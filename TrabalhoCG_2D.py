@@ -3,6 +3,7 @@ from OpenGL.GLUT import *
 
 widthWindow = 500
 heigthWindow = 500
+FPS = 60
 
 def inicio():
     glClearColor(1, 1, 1, 1)
@@ -14,6 +15,14 @@ def redimensionaJanela(w, h):
     widthWindow = w
     heigthWindow = h
     glViewport(0, 0, w, h)
+    glutPostRedisplay()
+
+def timer(v):
+
+    glutTimerFunc(int(1000/FPS), timer, 0)
+
+    # restante do código
+
     glutPostRedisplay()
 
 def cubo(fill=False):
@@ -73,6 +82,7 @@ glutInitWindowSize(widthWindow, heigthWindow)
 glutInitWindowPosition(0,0)
 glutCreateWindow('Primitivas')
 inicio()
+glutTimerFunc(int(1000/FPS), timer, 0)
 glutReshapeFunc(redimensionaJanela)
 glutDisplayFunc(desenha)
 glutMainLoop()
