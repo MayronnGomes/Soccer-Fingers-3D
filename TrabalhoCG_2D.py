@@ -1,10 +1,20 @@
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 
+widthWindow = 500
+heigthWindow = 500
+
 def inicio():
     glClearColor(1, 1, 1, 1)
     glPointSize(5)
     glLineWidth(3)
+
+def redimensionaJanela(w, h):
+    global widthWindow, heigthWindow
+    widthWindow = w
+    heigthWindow = h
+    glViewport(0, 0, w, h)
+    glutPostRedisplay()
 
 def cubo(fill=False):
 
@@ -50,13 +60,19 @@ def desenha():
     # triangulo(True)
     # triangulo()
 
+    glColor3f(1, 0, 0)
+    glBegin(GL_POINTS)
+    glVertex2f(2, 2)
+    glEnd()
+
     glFlush()
 
 glutInit()
 glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB)
-glutInitWindowSize(500,500)
+glutInitWindowSize(widthWindow, heigthWindow)
 glutInitWindowPosition(0,0)
 glutCreateWindow('Primitivas')
 inicio()
+glutReshapeFunc(redimensionaJanela)
 glutDisplayFunc(desenha)
 glutMainLoop()
