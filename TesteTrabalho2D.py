@@ -28,6 +28,17 @@ angleProgressbar = 0.0
 forca = glm.vec3(0.0, 0.0, 0.0)
 deslocamento = glm.vec3(0.0, 0.0, 0.0)
 velocidade = 0.05
+TIME = {
+    "belgica": 0,
+    "brasil": 0,
+    "inglaterra": 0,
+    "italia": 0
+}
+
+FORMATION = {
+    "1-2-2":   [glm.vec3(3, campoAlt/2, 0), glm.vec3(campoLar/4, campoAlt/2 - 5, 0), glm.vec3(campoLar/4, campoAlt/2 + 5, 0), glm.vec3(campoLar/2 - 3, campoAlt/2 - 2, 0), glm.vec3(campoLar/2 - 3, campoAlt/2 + 2, 0)],
+    "1-2-1-1": [glm.vec3(3, campoAlt/2, 0), glm.vec3(campoLar/4 - 1, campoAlt/2 - 4, 0), glm.vec3(campoLar/4 - 1, campoAlt/2 + 4, 0), glm.vec3(campoLar/2 - 3, campoAlt/2, 0), glm.vec3(campoLar/2 - 6, campoAlt/2, 0)]
+}
 
 def calcForca():
     global forca, deslocamento
@@ -141,20 +152,38 @@ class Campo:
 
 class Jogador:
 
-    def __init__(self):
-        pass
+    def __init__(self, raio, time, posicao):
+        self.raio = raio
+        self.time = time
+        self.posicao = posicao
 
     def desenha(self):
-        pass
+        jogador = Cube()
+# pos
+        glBindTexture(GL_TEXTURE_2D, self.time)
+        glPushMatrix()
+        glTranslatef(self.posicao.x - self.raio/2, self.posicao.y - self.raio/2, self.posicao.z)
+        glScalef(self.raio, self.raio, 1)
+        jogador.desenha(True)
+        glPopMatrix()
+        glBindTexture(GL_TEXTURE_2D, 0)     
 
 class Time:
 
-    def __init__(self, escudo, formacao):
+    def __init__(self, escudo, formacao, visitante):
         self.escudo = escudo
         self.formacao = formacao
+        self.jogadores = [Jogador(2, self.escudo, self.formacao[i]) for i in range(5)]
+        self.visitante = visitante
 
     def desenha(self):
-        pass
+        for i in self.jogadores:
+            glPushMatrix()
+            if self.visitante:
+                glTranslatef(campoLar, 0, 0)
+                glScalef(-1, 1, 1)
+            i.desenha()
+            glPopMatrix()
 
 class Bola:
 
@@ -225,6 +254,8 @@ class Game:
         texCampo = carregaTextura('campo.jpg')
         texBola = carregaTextura('bola.png')
         texProgBar = carregaTextura('arrow.png')
+        for i in TIME:
+            TIME[i] = carregaTextura(f'TIMES PNG/{i}.png')
         calcMatrix()
 
     def desenha(self):
@@ -243,6 +274,12 @@ class Game:
         glMultMatrixf(np.asarray(glm.transpose(M)))
         bola.desenha()
         glPopMatrix()
+
+        timeA = Time(TIME['inglaterra'], FORMATION['1-2-2'], False)
+        timeA.desenha()
+
+        timeB = Time(TIME['italia'], FORMATION['1-2-1-1'], True)
+        timeB.desenha()
 
         glPopMatrix()
 
