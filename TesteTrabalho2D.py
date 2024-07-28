@@ -15,7 +15,6 @@ mundoLar  = 10
 mundoAlt  = 10
 janelaLar = 960
 janelaAlt = 540
-pos = glm.vec3(0, 0, 0)
 dir = glm.vec3(0, bolaRaio, 0)
 lat = glm.vec3(bolaRaio, 0, 0)
 M = glm.mat4(1)
@@ -29,6 +28,7 @@ angleProgressbar = 0.0
 forca = glm.vec3(0.0, 0.0, 0.0)
 deslocamento = glm.vec3(0.0, 0.0, 0.0)
 velocidade = 0.05
+
 TIME = {
     "belgica": 0,
     "brasil": 0,
@@ -37,26 +37,17 @@ TIME = {
 }
 
 FORMATION = {
-    "1-2-2":   [glm.vec3(3, campoAlt/2, 0), glm.vec3(campoLar/4, campoAlt/2 - 5, 0), glm.vec3(campoLar/4, campoAlt/2 + 5, 0), glm.vec3(campoLar/2 - 3, campoAlt/2 - 2, 0), glm.vec3(campoLar/2 - 3, campoAlt/2 + 2, 0)],
-    "1-2-1-1": [glm.vec3(3, campoAlt/2, 0), glm.vec3(campoLar/4 - 1, campoAlt/2 - 4, 0), glm.vec3(campoLar/4 - 1, campoAlt/2 + 4, 0), glm.vec3(campoLar/2 - 3, campoAlt/2, 0), glm.vec3(campoLar/2 - 6, campoAlt/2, 0)]
+    "1-2-2":   [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-campoLar/4, -5, 0), glm.vec3(-campoLar/4, 5, 0), glm.vec3(-3, -2, 0), glm.vec3(-3, 2, 0)],
+    "1-2-1-1": [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-campoLar/4 - 1, -4, 0), glm.vec3(-campoLar/4 - 1, 4, 0), glm.vec3(-3, 0, 0), glm.vec3(-6, 0, 0)]
 }
 
-def calcForca():
-    global forca, deslocamento
+def recalcForca(normal):
+    global deslocamento, forca
+
+    forca = glm.reflect(forca, normal)
+    deslocamento = velocidade * forca
 
     # fazer Barra de força multiplicadores 1, 1.25, 1.5, 1.75, 2
-
-    forca *= (-1)
-
-    deslocamento = forca * velocidade
-
-
-def calcMatrix():
-    global pos, dir, lat, M
-    M[0] = glm.vec4(lat,0)   # 1ª coluna é igual ao vetor i (vetor que aponta pra lateral direita do carro)
-    M[1] = glm.vec4(dir,0)   # 2ª coluna é igual ao vetor j (vetor que aponta pra frente do carro)
-    M[2] = glm.vec4(0,0,1,0) # 3ª coluna é igual ao vetor k (vetor que aponta para o topo do carro (direção do eixo z))
-    M[3] = glm.vec4(pos,1)   # 4ª coluna é igual ao ponto O (posição do carro)
 
 def carregaTextura(filename):
     # carregamento da textura feita pelo módulo PIL
@@ -165,13 +156,13 @@ class Campo:
         glBindTexture(GL_TEXTURE_2D, 0)
         glPopMatrix()
 
-    def verifica_colisao(self):
+    def verifica_colisao(self, bola):
         # Colisão com as linha horizontais
-        if (abs(pos.y) + bolaRaio/2 > campoAlt/2) and (abs(pos.x) + bolaRaio/2 > campoLar/2):
+        if (abs(bola.pos.y) + bolaRaio/2 > campoAlt/2) and (abs(bola.pos.x) + bolaRaio/2 > campoLar/2):
             return glm.vec3(0, 0, 0), True
-        elif abs(pos.y) + bolaRaio/2 > campoAlt/2:
+        elif abs(bola.pos.y) + bolaRaio/2 > campoAlt/2:
             return glm.vec3(0, 1, 0), True
-        elif abs(pos.x) + bolaRaio/2 > campoLar/2:
+        elif abs(bola.pos.x) + bolaRaio/2 > campoLar/2:
             return glm.vec3(1, 0, 0), True
         else:
             return glm.vec3(0, 0, 0), False
@@ -193,31 +184,24 @@ class Jogador:
         glPopMatrix()
         glBindTexture(GL_TEXTURE_2D, 0)     
 
-    def verifica_colisao(self):
-        # Colisão com as linha horizontais
-        if (abs(pos.y) + bolaRaio/2 > campoAlt/2) and (abs(pos.x) + bolaRaio/2 > campoLar/2):
-            return glm.vec3(0, 0, 0), True
-        elif abs(pos.y) + bolaRaio/2 > campoAlt/2:
-            return glm.vec3(0, 1, 0), True
-        elif abs(pos.x) + bolaRaio/2 > campoLar/2:
-            return glm.vec3(1, 0, 0), True
-        else:
-            return glm.vec3(0, 0, 0), False
+    def verifica_colisao(self, bola):
+        if bolaRaio/2 + self.raio/2 >= glm.distance(self.posicao, bola.pos):
+            C = self.posicao - bola.pos
+            normal = glm.normalize(C)
+            return C, True
+        return glm.vec3(0, 0, 0), False
 
 class Time:
 
     def __init__(self, escudo, formacao, visitante):
         self.escudo = escudo
         self.formacao = formacao
-        self.jogadores = [Jogador(2, self.escudo, self.formacao[i]) for i in range(5)]
         self.visitante = visitante
+        self.jogadores = [Jogador(2, self.escudo, (self.formacao[i]*(-1) if self.visitante else self.formacao[i])) for i in range(5)]
 
     def desenha(self):
         for i in self.jogadores:
             glPushMatrix()
-            if self.visitante:
-                glTranslatef(campoLar, 0, 0)
-                glScalef(-1, 1, 1)
             i.desenha()
             glPopMatrix()
 
@@ -225,6 +209,7 @@ class Bola:
 
     def __init__(self, raio):
         self.raio = raio
+        self.pos = glm.vec3(0, 0, 0)
 
     def desenha(self):
         bola = Cube()
@@ -237,7 +222,7 @@ class Bola:
         bar = Cube()
 
         glPushMatrix()
-        glTranslatef(pos[0], pos[1], pos[2])
+        glTranslatef(self.pos.x, self.pos.y, self.pos.z)
         glRotatef(angleProgressbar + 90, 0, 0, 1)
         glTranslatef(-1/4, -3/2, 0)
         glScalef(1/2, 3, 1)
@@ -247,24 +232,18 @@ class Bola:
         glPopMatrix()
 
     def move(self):
-        global pos, forca
+        global forca
 
-        pos.x = pos.x + velocidade * forca.x
-        pos.y = pos.y + velocidade * forca.y
+        self.pos.x = self.pos.x + velocidade * forca.x
+        self.pos.y = self.pos.y + velocidade * forca.y
 
         forca.x -= deslocamento.x # decrementando a forca
         forca.y -= deslocamento.y # decrementando a forca
 
-        calcMatrix()
-
-# Objetos
-campo = Campo(campoLar, campoAlt)
-bola = Bola(bolaRaio)
-
 class Game:
 
     def __init__(self):
-        
+
         glutInit()
         glutInitDisplayMode(GLUT_MULTISAMPLE | GLUT_DOUBLE | GLUT_RGB)
         glutInitWindowSize(janelaLar, janelaAlt)
@@ -293,7 +272,10 @@ class Game:
         texGol = carregaTextura('Texturas/gol.jpg')
         for i in TIME:
             TIME[i] = carregaTextura(f'TIMES PNG/{i}.png')
-        calcMatrix()
+        self.campo = Campo(campoLar, campoAlt)
+        self.bola = Bola(bolaRaio)
+        self.timeA = Time(TIME['inglaterra'], FORMATION['1-2-2'], False)
+        self.timeB = Time(TIME['italia'], FORMATION['1-2-1-1'], True)
 
     def desenha(self):
         glClear(GL_COLOR_BUFFER_BIT)
@@ -303,26 +285,28 @@ class Game:
         glOrtho(-mundoLar, mundoLar, -mundoAlt + 2, mundoAlt + 2, -1, 1)
 
         glPushMatrix()
-        glTranslatef(-(campo.largura/2), -(campo.altura/2), 0)
-        campo.desenha()
-        campo.desenha_gol()
+        glTranslatef(-(self.campo.largura/2), -(self.campo.altura/2), 0)
+        self.campo.desenha()
+        self.campo.desenha_gol()
 
         glPushMatrix()
-        glTranslatef((campo.largura - bola.raio)/2, (campo.altura - bola.raio)/2, 0)
-        glMultMatrixf(np.asarray(glm.transpose(M)))
-        bola.desenha()
+        glTranslatef(self.campo.largura/2, self.campo.altura/2, 0)
+        
+        glPushMatrix()
+        glTranslatef(-self.bola.raio/2, -self.bola.raio/2, 0)
+        glTranslatef(self.bola.pos.x, self.bola.pos.y, self.bola.pos.z)
+        glScalef(self.bola.raio, self.bola.raio, 1)
+        self.bola.desenha()
         glPopMatrix()
 
-        timeA = Time(TIME['inglaterra'], FORMATION['1-2-2'], False)
-        timeA.desenha()
+        self.timeA.desenha()
+        self.timeB.desenha()
 
-        timeB = Time(TIME['italia'], FORMATION['1-2-1-1'], True)
-        timeB.desenha()
-
+        glPopMatrix()
         glPopMatrix()
 
         if(progressbar):
-            bola.desenha_progressbar()
+            self.bola.desenha_progressbar()
 
         glutSwapBuffers()
 
@@ -334,29 +318,10 @@ class Game:
         glViewport(0,0,w,h) 
 
     def timer(self, v):
-        global mov, forca, pos, angleProgressbar, deslocamento
+        global mov, forca, angleProgressbar, deslocamento
         glutTimerFunc(int(1000/FPS), self.timer, 0)
 
         if mov:
-            normal, col_campo = campo.verifica_colisao()
-            normal, col_jogador = False
-            if col_campo:
-                if normal == glm.vec3(0, 0, 0):
-                    # print(f'forca ant: {forca}')
-                    forca *= (-1)
-                    # print(f'forca dps: {forca}')
-                    deslocamento *= (-1)
-                    # print('canto\n\n\n\n\n\n')
-                else:
-                    # print(normal)
-                    # print(f'forca ant: {forca}')
-                    forca = glm.reflect(forca, normal)
-                    # print(f'forca dps: {forca}')
-                    deslocamento = glm.reflect(deslocamento, normal)
-            elif col_jogador:
-                pass
-
-            bola.move()
 
             if not(abs(forca.x) >= abs(deslocamento.x) or abs(forca.y) >= abs(deslocamento.y)):
                 print('Movimento parou')
@@ -364,11 +329,36 @@ class Game:
                 forca.x = forca.y = forca.z = 0
                 deslocamento.x = deslocamento.y = deslocamento.z = 0
                 angleProgressbar = 0.0
+                print('yyy')
+
+            else:
+                print(f'xxxxxx {forca} {deslocamento}')
+
+                normal, colisao_campo = self.campo.verifica_colisao(self.bola)
+                normal_jogador, colisao_jogador = False, False
+
+                if colisao_campo:
+                    if normal == glm.vec3(0, 0, 0):
+                        forca *= (-1)
+                        deslocamento *= velocidade * forca
+                    else:
+                        recalcForca(normal)
+                    self.bola.move()
+                else:
+                    # for i in self.timeA.jogadores + self.timeB.jogadores:
+                        # normal_jogador, colisao_jogador = i.verifica_colisao(self.bola)
+
+                #         if colisao_jogador:
+                #             recalcForca(normal_jogador)
+                #             break
+                    self.bola.move()
+                    print('xxx')
+
 
         glutPostRedisplay()
 
     def mouse(self, button, state, x, y):
-        global progressbar, forca, mov, angleProgressbar
+        global progressbar, forca, mov, angleProgressbar, deslocamento
 
         model_view = glGetDoublev(GL_MODELVIEW_MATRIX)
         projection = glGetDoublev(GL_PROJECTION_MATRIX)
@@ -383,17 +373,18 @@ class Game:
         normalized_y = round(normalized_y, 3)
 
         if button == GLUT_LEFT_BUTTON and state == GLUT_DOWN:
-            if (pos[0] - bolaRaio) <= normalized_x <= (pos[0] + bolaRaio) and (pos[1] - bolaRaio) <= normalized_y <= (pos[1] + bolaRaio) and not mov:
+            if (self.bola.pos.x - bolaRaio) <= normalized_x <= (self.bola.pos.x + bolaRaio) and (self.bola.pos.y - bolaRaio) <= normalized_y <= (self.bola.pos.y + bolaRaio) and not mov:
                 progressbar = True
-                forca.x = normalized_x - pos.x
-                forca.y = normalized_y - pos.y
+                forca.x = normalized_x - self.bola.pos.x
+                forca.y = normalized_y - self.bola.pos.y
                 angleProgressbar = math.degrees(math.atan2(forca.y, forca.x))
 
         elif button == GLUT_LEFT_BUTTON and state == GLUT_UP:
             progressbar = False
             if (abs(forca.x) > 0 or abs(forca.y) > 0 or abs(forca.z) > 0) and not mov:
                 mov = True
-                calcForca()
+                forca *= -1
+                deslocamento = forca * velocidade
     
     def motion(self, x, y):
         global forca, angleProgressbar
@@ -411,8 +402,8 @@ class Game:
             normalized_x, normalized_y, _ = gluUnProject(win_x, win_y, win_z, model_view, projection, viewport)
             normalized_x = round(normalized_x, 3)
             normalized_y = round(normalized_y, 3)
-            forca.x = normalized_x - pos.x
-            forca.y = normalized_y - pos.y
+            forca.x = normalized_x - self.bola.pos.x
+            forca.y = normalized_y - self.bola.pos.y
             angleProgressbar = math.degrees(math.atan2(forca.y, forca.x))
 
 if __name__ == "__main__":
