@@ -38,7 +38,7 @@ TIME = {
 
 FORMATION = {
     "1-2-2":   [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-campoLar/4, -5, 0), glm.vec3(-campoLar/4, 5, 0), glm.vec3(-3, -2, 0), glm.vec3(-3, 2, 0)],
-    "1-2-1-1": [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-campoLar/4 - 1, -4, 0), glm.vec3(-campoLar/4 - 1, 4, 0), glm.vec3(-3, 0, 0), glm.vec3(-6, 0, 0)]
+    "1-2-1-1": [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-campoLar/4 - 1, -4, 0), glm.vec3(-campoLar/4 - 1, 4, 0), glm.vec3(-3, 0, 0), glm.vec3(-7, 0, 0)]
 }
 
 def recalcMov(normal):
@@ -194,7 +194,7 @@ class Jogador:
         if bolaRaio/2 + self.raio/2 >= glm.distance(self.posicao, bola.pos):
             C = self.posicao - bola.pos
             normal = glm.normalize(C)
-            return C, True
+            return normal, True
         return glm.vec3(0, 0, 0), False
 
 class Time:
@@ -329,35 +329,37 @@ class Game:
 
         if mov:
 
+            # movimento da bola parou
             if (abs(deslocamento.x + velocidade.x) > abs(forca.x) or abs(deslocamento.y + velocidade.y) > abs(forca.y)):
                 print('Movimento parou')
                 mov = False
                 forca.x = forca.y = forca.z = 0
                 deslocamento.x = deslocamento.y = deslocamento.z = 0
                 angleProgressbar = 0.0
-                print('yyy')
 
+            # tratamento de colisão e movimento da bola
             else:
-                # print(f'xxxxxx {forca} {deslocamento}')
-
                 normal, colisao_campo = self.campo.verifica_colisao(self.bola)
-                # normal_jogador, colisao_jogador = False, False
+                colisao_jogador = False
 
-                if colisao_campo:
-                    # print('colidiu!!!')
+                if colisao_campo: # colisão no campo
                     recalcMov(normal)
+                elif (self.bola.pos.x < 0): # colisão time A
+                    for i in self.timeA.jogadores:
+                        normal, colisao_jogador = i.verifica_colisao(self.bola)
+
+                        if colisao_jogador:
+                            recalcMov(normal)
+                            break
+                elif (self.bola.pos.x > 0): # colisão time B
+                    for i in self.timeB.jogadores:
+                        normal, colisao_jogador = i.verifica_colisao(self.bola)
+
+                        if colisao_jogador:
+                            recalcMov(normal)
+                            break
 
                 self.bola.move()
-                # else:
-                    # for i in self.timeA.jogadores + self.timeB.jogadores:
-                        # normal_jogador, colisao_jogador = i.verifica_colisao(self.bola)
-
-                #         if colisao_jogador:
-                #             recalcForca(normal_jogador)
-                #             break
-                    # self.bola.move()
-                    # print('xxx')
-
 
         glutPostRedisplay()
 
