@@ -222,9 +222,6 @@ class Game:
         glEnable(GL_TEXTURE_2D)                      
         glEnable(GL_BLEND);                         
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        texCampo = carregaTextura('campo.jpg')
-        texBola = carregaTextura('bola.png')
-        texProgBar = carregaTextura('arrow.png')
         calcMatrix()
 
     def desenha(self):
@@ -232,22 +229,30 @@ class Game:
 
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glOrtho(-mundoLar, mundoLar, -mundoAlt + 2, mundoAlt + 2, -1, 1)
+        glOrtho(-5, 5, -5, 5, -1, 1)
+
 
         glPushMatrix()
-        glTranslatef(-(campo.largura/2), -(campo.altura/2), 0)
-        campo.desenha()
-
-        glPushMatrix()
-        glTranslatef((campo.largura - bola.raio)/2, (campo.altura - bola.raio)/2, 0)
-        glMultMatrixf(np.asarray(glm.transpose(M)))
-        bola.desenha()
+        glColor3f(1, 0, 0)
+        glTranslatef(3, 1, 0)
+        glRotatef(45, 0, 0, 1)
+        glScalef(math.sqrt(8)/2, -math.sqrt(2), 1)
+        glBegin(GL_TRIANGLES)
+        glVertex2f(-1, 0)
+        glVertex2f(1, 0)
+        glVertex2f(0, 1)
+        glEnd()
         glPopMatrix()
 
-        glPopMatrix()
-
-        if(progressbar):
-            bola.desenha_progressbar()
+        glColor3f(1, 1, 1)
+        glPointSize(4)
+        glBegin(GL_POINTS)
+        glVertex2f(0,0)
+        glVertex2f(4,0)
+        glVertex2f(4,2)
+        glVertex2f(3,1)
+        glVertex2f(2,0)
+        glEnd()
 
         glutSwapBuffers()
 
@@ -332,4 +337,6 @@ class Game:
             angleProgressbar = math.degrees(math.atan2(forca.y, forca.x))
 
 if __name__ == "__main__":
+    x = glm.reflect(glm.vec3(8, 5, 0), glm.vec3(1, 0, 0))
+    print(x)
     game = Game()
