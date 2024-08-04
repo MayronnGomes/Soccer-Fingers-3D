@@ -27,7 +27,7 @@ mov = False
 angleProgressbar = 0.0
 forca = glm.vec3(0.0, 0.0, 0.0)
 deslocamento = glm.vec3(0.0, 0.0, 0.0)
-velocidade = 0.05
+velocidade = glm.vec3(0.0, 0.0, 0.0)
 
 TIME = {
     "belgica": 0,
@@ -41,11 +41,12 @@ FORMATION = {
     "1-2-1-1": [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-campoLar/4 - 1, -4, 0), glm.vec3(-campoLar/4 - 1, 4, 0), glm.vec3(-3, 0, 0), glm.vec3(-6, 0, 0)]
 }
 
-def recalcForca(normal):
-    global deslocamento, forca
+def recalcMov(normal):
+    global deslocamento, forca, velocidade
 
     forca = glm.reflect(forca, normal)
-    deslocamento = velocidade * forca
+    deslocamento = glm.reflect(deslocamento, normal)
+    velocidade = glm.reflect(velocidade, normal)
 
     # fazer Barra de força multiplicadores 1, 1.25, 1.5, 1.75, 2
 
@@ -157,12 +158,17 @@ class Campo:
         glPopMatrix()
 
     def verifica_colisao(self, bola):
-        # Colisão com as linha horizontais
-        if (abs(bola.pos.y) + bolaRaio/2 > campoAlt/2) and (abs(bola.pos.x) + bolaRaio/2 > campoLar/2):
-            return glm.vec3(0, 0, 0), True
-        elif abs(bola.pos.y) + bolaRaio/2 > campoAlt/2:
+        if (bola.pos.y + bolaRaio/2 >= campoAlt/2) and (velocidade.y > 0):
+            print(f'y+ {bola.pos} {velocidade}')
             return glm.vec3(0, 1, 0), True
-        elif abs(bola.pos.x) + bolaRaio/2 > campoLar/2:
+        elif (bola.pos.y - bolaRaio/2 <= -campoAlt/2) and (velocidade.y < 0):
+            print(f'y- {bola.pos} {velocidade}')
+            return glm.vec3(0, 1, 0), True
+        elif (bola.pos.x + bolaRaio/2 >= campoLar/2) and (velocidade.x > 0):
+            print(f'x+ {bola.pos} {velocidade}')
+            return glm.vec3(1, 0, 0), True
+        elif (bola.pos.x - bolaRaio/2 <= -campoLar/2) and (velocidade.x < 0):
+            print(f'x- {bola.pos} {velocidade}')
             return glm.vec3(1, 0, 0), True
         else:
             return glm.vec3(0, 0, 0), False
@@ -232,13 +238,13 @@ class Bola:
         glPopMatrix()
 
     def move(self):
-        global forca
+        global deslocamento
 
-        self.pos.x = self.pos.x + velocidade * forca.x
-        self.pos.y = self.pos.y + velocidade * forca.y
+        self.pos.x += velocidade.x
+        self.pos.y += velocidade.y
 
-        forca.x -= deslocamento.x # decrementando a forca
-        forca.y -= deslocamento.y # decrementando a forca
+        deslocamento.x += velocidade.x # incrementando o deslocamento
+        deslocamento.y += velocidade.y # incrementando o deslocamento
 
 class Game:
 
@@ -323,7 +329,7 @@ class Game:
 
         if mov:
 
-            if not(abs(forca.x) >= abs(deslocamento.x) or abs(forca.y) >= abs(deslocamento.y)):
+            if (abs(deslocamento.x + velocidade.x) > abs(forca.x) or abs(deslocamento.y + velocidade.y) > abs(forca.y)):
                 print('Movimento parou')
                 mov = False
                 forca.x = forca.y = forca.z = 0
@@ -332,33 +338,31 @@ class Game:
                 print('yyy')
 
             else:
-                print(f'xxxxxx {forca} {deslocamento}')
+                # print(f'xxxxxx {forca} {deslocamento}')
 
                 normal, colisao_campo = self.campo.verifica_colisao(self.bola)
-                normal_jogador, colisao_jogador = False, False
+                # normal_jogador, colisao_jogador = False, False
 
                 if colisao_campo:
-                    if normal == glm.vec3(0, 0, 0):
-                        forca *= (-1)
-                        deslocamento *= velocidade * forca
-                    else:
-                        recalcForca(normal)
-                    self.bola.move()
-                else:
+                    # print('colidiu!!!')
+                    recalcMov(normal)
+
+                self.bola.move()
+                # else:
                     # for i in self.timeA.jogadores + self.timeB.jogadores:
                         # normal_jogador, colisao_jogador = i.verifica_colisao(self.bola)
 
                 #         if colisao_jogador:
                 #             recalcForca(normal_jogador)
                 #             break
-                    self.bola.move()
-                    print('xxx')
+                    # self.bola.move()
+                    # print('xxx')
 
 
         glutPostRedisplay()
 
     def mouse(self, button, state, x, y):
-        global progressbar, forca, mov, angleProgressbar, deslocamento
+        global progressbar, forca, mov, angleProgressbar, velocidade
 
         model_view = glGetDoublev(GL_MODELVIEW_MATRIX)
         projection = glGetDoublev(GL_PROJECTION_MATRIX)
@@ -384,7 +388,7 @@ class Game:
             if (abs(forca.x) > 0 or abs(forca.y) > 0 or abs(forca.z) > 0) and not mov:
                 mov = True
                 forca *= -1
-                deslocamento = forca * velocidade
+                velocidade = forca * 0.05
     
     def motion(self, x, y):
         global forca, angleProgressbar
