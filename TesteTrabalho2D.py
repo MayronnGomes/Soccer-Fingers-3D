@@ -146,16 +146,24 @@ class Campo:
     def desenha_gol(self):
         gol = Cube()
 
+        # glPushMatrix()
+        # glColor3f(0, 0, 1)
+        # glTranslatef(-2, campoAlt/2 - 2.5, 0)
+        # glScalef(2, 4.8, 1)
+        # gol.desenha(True)
+        # glPopMatrix()
+
         glPushMatrix()
-        glTranslatef(-3, self.altura/2 - 2.5, 0)
-        glScalef(3, 5, 1)
+        glTranslatef(-2, self.altura/2 - 2.7, 0)
+        glScalef(2, 6, 1)
         glBindTexture(GL_TEXTURE_2D, texGol)
         gol.desenha(True)
-        glTranslatef(12, 0, 0)
+        glTranslatef(17, 0, 0)
         glScalef(-1, 1, 1)
         gol.desenha(True)
         glBindTexture(GL_TEXTURE_2D, 0)
         glPopMatrix()
+
 
     def verifica_colisao(self, bola):
         if (bola.pos.y + bolaRaio/2 >= campoAlt/2) and (velocidade.y > 0):
@@ -275,7 +283,7 @@ class Game:
         texCampo = carregaTextura('Texturas/campo.jpg')
         texBola = carregaTextura('Texturas/bola.png')
         texProgBar = carregaTextura('Texturas/arrow.png')
-        texGol = carregaTextura('Texturas/gol.jpg')
+        texGol = carregaTextura('Texturas/trave.png')
         for i in TIME:
             TIME[i] = carregaTextura(f'TIMES PNG/{i}.png')
         self.campo = Campo(campoLar, campoAlt)
