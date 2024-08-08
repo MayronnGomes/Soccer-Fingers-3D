@@ -146,13 +146,6 @@ class Campo:
     def desenha_gol(self):
         gol = Cube()
 
-        # glPushMatrix()
-        # glColor3f(0, 0, 1)
-        # glTranslatef(-2, campoAlt/2 - 2.5, 0)
-        # glScalef(2, 4.8, 1)
-        # gol.desenha(True)
-        # glPopMatrix()
-
         glPushMatrix()
         glTranslatef(-2, self.altura/2 - 2.7, 0)
         glScalef(2, 6, 1)
@@ -164,7 +157,6 @@ class Campo:
         glBindTexture(GL_TEXTURE_2D, 0)
         glPopMatrix()
 
-
     def verifica_colisao(self, bola):
         if (bola.pos.y + bolaRaio/2 >= campoAlt/2) and (velocidade.y > 0):
             print(f'y+ {bola.pos} {velocidade}')
@@ -175,12 +167,34 @@ class Campo:
         elif (bola.pos.x + bolaRaio/2 >= campoLar/2) and (velocidade.x > 0):
             print(f'x+ {bola.pos} {velocidade}')
             return glm.vec3(1, 0, 0), True
-        elif (bola.pos.x - bolaRaio/2 <= -campoLar/2) and (velocidade.x < 0):
-            print(f'x- {bola.pos} {velocidade}')
-            return glm.vec3(1, 0, 0), True
+        elif (bola.pos.x - bolaRaio/2 <= -campoLar/2) and (abs(bola.pos.y) + bolaRaio/2 >= 2.4):
+            # print(f'x- {bola.pos} {velocidade}')
+            if (bola.pos.x - bolaRaio/2 - deslocamento.x) > -15:
+                print(f'xx {deslocamento} {bola.pos}')
+                return glm.vec3(1, 0, 0), True
+            else:
+                print(f'zz {deslocamento} {bola.pos}')
+                return glm.vec3(0, 1, 0), True
         else:
             return glm.vec3(0, 0, 0), False
         
+    def colisao_gol(self, bola):
+        global mov
+        if (abs(bola.pos.x) + bolaRaio/2 >= campoLar/2):
+            # if (2.4 > bola.pos.y + bolaRaio/2) and (bola.pos.y - bolaRaio/2 > -2.4):
+            if abs(bola.pos.x) - bolaRaio/2 > campoLar/2:
+                print('gol')
+                # stop move
+                # mov = False
+                return True
+            else:
+                return False
+            """if (2.4 <= bola.pos.y + bolaRaio/2) or (-2.4 >= bola.pos.y - bolaRaio/2): #CORRETO
+                recalcMov(glm.vec3(0, 1, 0))
+                return True"""
+        else: 
+            return False  
+
 class Jogador:
 
     def __init__(self, raio, time, posicao):
@@ -199,7 +213,7 @@ class Jogador:
         glBindTexture(GL_TEXTURE_2D, 0)     
 
     def verifica_colisao(self, bola):
-        if bolaRaio/2 + self.raio/2 >= glm.distance(self.posicao, bola.pos):
+        if bolaRaio/2 + self.raio/2 > glm.distance(self.posicao, bola.pos):
             C = self.posicao - bola.pos
             normal = glm.normalize(C)
             return normal, True
@@ -283,13 +297,13 @@ class Game:
         texCampo = carregaTextura('Texturas/campo.jpg')
         texBola = carregaTextura('Texturas/bola.png')
         texProgBar = carregaTextura('Texturas/arrow.png')
-        texGol = carregaTextura('Texturas/trave.png')
+        texGol = carregaTextura('Texturas/trave.png') 
         for i in TIME:
             TIME[i] = carregaTextura(f'TIMES PNG/{i}.png')
         self.campo = Campo(campoLar, campoAlt)
         self.bola = Bola(bolaRaio)
-        self.timeA = Time(TIME['inglaterra'], FORMATION['1-2-2'], False)
-        self.timeB = Time(TIME['italia'], FORMATION['1-2-1-1'], True)
+        self.timeA = Time(TIME['belgica'], FORMATION['1-2-1-1'], False)
+        self.timeB = Time(TIME['brasil'], FORMATION['1-2-2'], True)
 
     def desenha(self):
         glClear(GL_COLOR_BUFFER_BIT)
@@ -339,7 +353,9 @@ class Game:
 
             # movimento da bola parou
             if (abs(deslocamento.x + velocidade.x) > abs(forca.x) or abs(deslocamento.y + velocidade.y) > abs(forca.y)):
+                
                 print('Movimento parou')
+                # troca jogador
                 mov = False
                 forca.x = forca.y = forca.z = 0
                 deslocamento.x = deslocamento.y = deslocamento.z = 0
@@ -347,16 +363,20 @@ class Game:
 
             # tratamento de colisão e movimento da bola
             else:
+
                 normal, colisao_campo = self.campo.verifica_colisao(self.bola)
                 colisao_jogador = False
-
                 if colisao_campo: # colisão no campo
                     recalcMov(normal)
-                elif (self.bola.pos.x < 0): # colisão time A
+                # elif self.campo.colisao_gol(self.bola):
+                #     # print('colisão gol')
+                #     pass
+                '''elif (self.bola.pos.x < 0): # colisão time A
                     for i in self.timeA.jogadores:
                         normal, colisao_jogador = i.verifica_colisao(self.bola)
 
                         if colisao_jogador:
+                            forca
                             recalcMov(normal)
                             break
                 elif (self.bola.pos.x > 0): # colisão time B
@@ -365,7 +385,7 @@ class Game:
 
                         if colisao_jogador:
                             recalcMov(normal)
-                            break
+                            break'''
 
                 self.bola.move()
 
