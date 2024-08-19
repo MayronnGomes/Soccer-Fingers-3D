@@ -287,6 +287,18 @@ class Bola:
         deslocamento.x += velocidade.x # incrementando o deslocamento
         deslocamento.y += velocidade.y # incrementando o deslocamento
 
+class Placar:
+
+    def __init__(self, player1, player2):
+        self.player1 = player1
+        self.player2 = player2
+        self.score1 = 0
+        self.score2 = 0
+        self.timeSec = 30
+
+    def desenha(self):
+        pass
+
 class Game:
 
     def __init__(self):
