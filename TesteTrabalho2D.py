@@ -158,27 +158,46 @@ class Campo:
         glPopMatrix()
 
     def verifica_colisao(self, bola):
-        if (bola.pos.y + bolaRaio/2 >= campoAlt/2) and (velocidade.y > 0):
-            print(f'y+ {bola.pos} {velocidade}')
+        if (bola.pos.y + bolaRaio/2 >= campoAlt/2) and (velocidade.y > 0):        # A POSITIVO
+            print(f'a+ {bola.pos} {velocidade}')
             return glm.vec3(0, 1, 0), True
-        elif (bola.pos.y - bolaRaio/2 <= -campoAlt/2) and (velocidade.y < 0):
-            print(f'y- {bola.pos} {velocidade}')
+        elif (bola.pos.y - bolaRaio/2 <= -campoAlt/2) and (velocidade.y < 0):     # A NEGATIVO
+            print(f'a- {bola.pos} {velocidade}')
             return glm.vec3(0, 1, 0), True
-        elif (bola.pos.x + bolaRaio/2 >= campoLar/2) and (velocidade.x > 0):
-            print(f'x+ {bola.pos} {velocidade}')
+        elif (bola.pos.x + bolaRaio/2 >= campoLar/2 + 2) and (velocidade.x > 0):  # B POSITIVO
+            print(f'b+ {bola.pos} {velocidade}')
             return glm.vec3(1, 0, 0), True
-        elif (bola.pos.x - bolaRaio/2 <= -campoLar/2) and (abs(bola.pos.y) + bolaRaio/2 >= 2.4):
-            # print(f'x- {bola.pos} {velocidade}')
-            if (bola.pos.x - bolaRaio/2 - deslocamento.x) > -15:
-                print(f'xx {deslocamento} {bola.pos}')
-                return glm.vec3(1, 0, 0), True
-            else:
-                print(f'zz {deslocamento} {bola.pos}')
-                return glm.vec3(0, 1, 0), True
+        elif (bola.pos.x - bolaRaio/2 <= -campoLar/2 - 2) and (velocidade.x < 0): # B NEGATIVO
+            print(f'b- {bola.pos} {velocidade}')
+            return glm.vec3(1, 0, 0), True
+        elif (bola.pos.x + bolaRaio/2 > campoLar/2) and (bola.pos.y + bolaRaio/2 >= 2.4) and (bola.pos.y + bolaRaio/2 - velocidade.y < 2.4) and (velocidade.y > 0):     # E POSITIVO
+            print(f'e+ {bola.pos} {velocidade}')
+            return glm.vec3(0, 1, 0), True
+        elif (bola.pos.x - bolaRaio/2 < -campoLar/2) and (bola.pos.y + bolaRaio/2 >= 2.4) and (bola.pos.y + bolaRaio/2 - velocidade.y < 2.4) and (velocidade.y > 0):    # E NEGATIVO
+            print(f'e- {bola.pos} {velocidade}')
+            return glm.vec3(0, 1, 0), True
+        elif (bola.pos.x + bolaRaio/2 >= campoLar/2) and (bola.pos.y + bolaRaio/2 >= 2.4) and (velocidade.x > 0):    # C POSITIVO
+            print(f'c+ {bola.pos} {velocidade}')
+            return glm.vec3(1, 0, 0), True
+        elif (bola.pos.x - bolaRaio/2 <= -campoLar/2) and (bola.pos.y + bolaRaio/2 >= 2.4) and (velocidade.x < 0):   # C NEGATIVO
+            print(f'c- {bola.pos} {velocidade}')
+            return glm.vec3(1, 0, 0), True
+        elif (bola.pos.x + bolaRaio/2 > campoLar/2) and (bola.pos.y - bolaRaio/2 <= -2.4) and (bola.pos.y - bolaRaio/2 - velocidade.y > -2.4) and (velocidade.y < 0):    # F POSITIVO
+            print(f'f+ {bola.pos} {velocidade}')
+            return glm.vec3(0, 1, 0), True
+        elif (bola.pos.x - bolaRaio/2 < -campoLar/2) and (bola.pos.y - bolaRaio/2 <= -2.4) and (bola.pos.y - bolaRaio/2 - velocidade.y > -2.4) and (velocidade.y < 0):   # F NEGATIVO
+            print(f'f- {bola.pos} {velocidade}')
+            return glm.vec3(0, 1, 0), True
+        elif (bola.pos.x + bolaRaio/2 >= campoLar/2) and (bola.pos.y - bolaRaio/2 <= -2.4) and (velocidade.x > 0):   # D POSITIVO
+            print(f'd+ {bola.pos} {velocidade}')
+            return glm.vec3(1, 0, 0), True
+        elif (bola.pos.x - bolaRaio/2 <= -campoLar/2) and (bola.pos.y - bolaRaio/2 <= -2.4) and (velocidade.x < 0):  # D NEGATIVO
+            print(f'd- {bola.pos} {velocidade}')
+            return glm.vec3(1, 0, 0), True
         else:
             return glm.vec3(0, 0, 0), False
         
-    def colisao_gol(self, bola):
+    def colisao_gol(self, bola): # ERRO
         global mov
         if (abs(bola.pos.x) + bolaRaio/2 >= campoLar/2):
             # if (2.4 > bola.pos.y + bolaRaio/2) and (bola.pos.y - bolaRaio/2 > -2.4):

@@ -170,30 +170,30 @@ class Campo:
         elif (bola.pos.x - bolaRaio/2 <= -campoLar/2 - 2) and (velocidade.x < 0): # B NEGATIVO
             print(f'b- {bola.pos} {velocidade}')
             return glm.vec3(1, 0, 0), True
+        elif (bola.pos.x + bolaRaio/2 > campoLar/2) and (bola.pos.y + bolaRaio/2 >= 2.4) and (bola.pos.y + bolaRaio/2 - velocidade.y < 2.4) and (velocidade.y > 0):     # E POSITIVO
+            print(f'e+ {bola.pos} {velocidade}')
+            return glm.vec3(0, 1, 0), True
+        elif (bola.pos.x - bolaRaio/2 < -campoLar/2) and (bola.pos.y + bolaRaio/2 >= 2.4) and (bola.pos.y + bolaRaio/2 - velocidade.y < 2.4) and (velocidade.y > 0):    # E NEGATIVO
+            print(f'e- {bola.pos} {velocidade}')
+            return glm.vec3(0, 1, 0), True
         elif (bola.pos.x + bolaRaio/2 >= campoLar/2) and (bola.pos.y + bolaRaio/2 >= 2.4) and (velocidade.x > 0):    # C POSITIVO
             print(f'c+ {bola.pos} {velocidade}')
             return glm.vec3(1, 0, 0), True
         elif (bola.pos.x - bolaRaio/2 <= -campoLar/2) and (bola.pos.y + bolaRaio/2 >= 2.4) and (velocidade.x < 0):   # C NEGATIVO
             print(f'c- {bola.pos} {velocidade}')
             return glm.vec3(1, 0, 0), True
+        elif (bola.pos.x + bolaRaio/2 > campoLar/2) and (bola.pos.y - bolaRaio/2 <= -2.4) and (bola.pos.y - bolaRaio/2 - velocidade.y > -2.4) and (velocidade.y < 0):    # F POSITIVO
+            print(f'f+ {bola.pos} {velocidade}')
+            return glm.vec3(0, 1, 0), True
+        elif (bola.pos.x - bolaRaio/2 < -campoLar/2) and (bola.pos.y - bolaRaio/2 <= -2.4) and (bola.pos.y - bolaRaio/2 - velocidade.y > -2.4) and (velocidade.y < 0):   # F NEGATIVO
+            print(f'f- {bola.pos} {velocidade}')
+            return glm.vec3(0, 1, 0), True
         elif (bola.pos.x + bolaRaio/2 >= campoLar/2) and (bola.pos.y - bolaRaio/2 <= -2.4) and (velocidade.x > 0):   # D POSITIVO
             print(f'd+ {bola.pos} {velocidade}')
             return glm.vec3(1, 0, 0), True
         elif (bola.pos.x - bolaRaio/2 <= -campoLar/2) and (bola.pos.y - bolaRaio/2 <= -2.4) and (velocidade.x < 0):  # D NEGATIVO
             print(f'd- {bola.pos} {velocidade}')
             return glm.vec3(1, 0, 0), True
-        elif (bola.pos.x + bolaRaio/2 > campoLar/2) and (bola.pos.y + bolaRaio/2 >= 2.4) and (velocidade.y > 0):     # E POSITIVO
-            print(f'e+ {bola.pos} {velocidade}')
-            return glm.vec3(0, 1, 0), True
-        elif (bola.pos.x - bolaRaio/2 < -campoLar/2) and (bola.pos.y + bolaRaio/2 >= 2.4) and (velocidade.y > 0):    # E NEGATIVO
-            print(f'e- {bola.pos} {velocidade}')
-            return glm.vec3(0, 1, 0), True
-        elif (bola.pos.x + bolaRaio/2 > campoLar/2) and (bola.pos.y + bolaRaio/2 <= -2.4) and (velocidade.y < 0):    # F POSITIVO
-            print(f'f+ {bola.pos} {velocidade}')
-            return glm.vec3(0, 1, 0), True
-        elif (bola.pos.x - bolaRaio/2 < -campoLar/2) and (bola.pos.y - bolaRaio/2 <= -2.4) and (velocidade.y < 0):   # F NEGATIVO
-            print(f'f- {bola.pos} {velocidade}')
-            return glm.vec3(0, 1, 0), True
         else:
             return glm.vec3(0, 0, 0), False
         
