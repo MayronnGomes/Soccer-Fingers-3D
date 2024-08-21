@@ -287,6 +287,75 @@ class Bola:
         deslocamento.x += velocidade.x # incrementando o deslocamento
         deslocamento.y += velocidade.y # incrementando o deslocamento
 
+class Placar:
+
+    def __init__(self, time1, time2):
+        self.time1 = time1
+        self.time2 = time2
+        self.score1 = 0
+        self.score2 = 0
+        self.timeSec = 30
+
+    def desenha(self):
+        cubo = Cube()
+
+        glPushMatrix()
+        glTranslatef(0,3,0)
+        glScalef(1,1/1.5,1)
+        
+        glPushMatrix() #desenha o fundo cinza
+        glColor3f(0.188, 0.184, 0.176) # vermelho, verde, azul
+        glTranslatef(-15, 8.3, 0)
+        glScalef(30,4.2,1)
+        cubo.desenha(True)
+        glPopMatrix()
+        
+
+        glPushMatrix() #desenha lado brando dir
+        glColor3f(0.933,0.933,0.933) # vermelho, verde, azul
+        glTranslatef(0, 10.3, 0)
+        glScalef(15,2.2,1)
+        cubo.desenha(True)
+        glPopMatrix()
+        
+        glPushMatrix() #desenha lado brando esq
+        glColor3f(0.933,0.933,0.933) # vermelho, verde, azul
+        glTranslatef(0, 10.3, 0)
+        glScalef(-15,2.2,1)
+        cubo.desenha(True)
+        glPopMatrix()
+
+        glPushMatrix() #desenha lado cinza dir
+        glColor3f(0.753,0.753,0.753) # vermelho, verde, azul
+        glTranslatef(0,9.7,0)
+        glScalef(5,2.8, 1)
+        cubo.desenha(True)
+        glPopMatrix()
+
+        glPushMatrix() #desenha lado cinza dir
+        glColor3f(0.753,0.753,0.753) # vermelho, verde, azul
+        glTranslatef(0,9.7,0)
+        glScalef(-5,2.8, 1)
+        cubo.desenha(True)
+        glPopMatrix()
+
+        glPushMatrix() # desenha o quadrado do meio
+        glColor3f(0.290, 0.290, 0.282) # vermelho, verde, azul
+        glTranslatef(-1.5,8.8,0)
+        glScalef(3, 3.7, 1)
+        cubo.desenha(True)
+        glPopMatrix()
+
+        glPopMatrix()
+        
+        glPushMatrix() # 
+        jogador1 = Jogador(1.5, self.time1, glm.vec3(-14, 10.6, 0))
+        jogador2 = Jogador(1.5, self.time2, glm.vec3(14, 10.6, 0))
+
+        jogador1.desenha()
+        jogador2.desenha()
+        glPopMatrix()
+
 class Game:
 
     def __init__(self):
@@ -323,6 +392,7 @@ class Game:
         self.bola = Bola(bolaRaio)
         self.timeA = Time(TIME['belgica'], FORMATION['1-2-1-1'], False)
         self.timeB = Time(TIME['brasil'], FORMATION['1-2-2'], True)
+        self.placar = Placar(self.timeA.escudo, self.timeB.escudo)
 
     def desenha(self):
         glClear(GL_COLOR_BUFFER_BIT)
@@ -354,6 +424,8 @@ class Game:
 
         if(progressbar):
             self.bola.desenha_progressbar()
+
+        self.placar.desenha()
 
         glutSwapBuffers()
 
