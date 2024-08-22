@@ -41,6 +41,10 @@ FORMATION = {
     "1-2-1-1": [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-campoLar/4 - 1, -4, 0), glm.vec3(-campoLar/4 - 1, 4, 0), glm.vec3(-3, 0, 0), glm.vec3(-7, 0, 0)]
 }
 
+SIGLAS = {}
+
+PLACAR = {}
+
 def recalcMov(normal):
     global deslocamento, forca, velocidade
 
@@ -241,7 +245,7 @@ class Jogador:
 class Time:
 
     def __init__(self, escudo, formacao, visitante):
-        self.escudo = escudo
+        self.escudo = TIME[escudo]
         self.formacao = formacao
         self.visitante = visitante
         self.jogadores = [Jogador(2, self.escudo, (self.formacao[i]*(-1) if self.visitante else self.formacao[i])) for i in range(5)]
@@ -292,9 +296,8 @@ class Placar:
     def __init__(self, time1, time2):
         self.time1 = time1
         self.time2 = time2
-        self.score1 = 0
-        self.score2 = 0
-        self.timeSec = 30
+        self.score1 = '0'
+        self.score2 = '0'
 
     def desenha(self):
         cubo = Cube()
@@ -305,37 +308,36 @@ class Placar:
         
         glPushMatrix() #desenha o fundo cinza
         glColor3f(0.188, 0.184, 0.176) # vermelho, verde, azul
-        glTranslatef(-15, 8.3, 0)
-        glScalef(30,4.2,1)
+        glTranslatef(-12, 8.3, 0)
+        glScalef(24, 4.2, 1)
         cubo.desenha(True)
         glPopMatrix()
         
-
         glPushMatrix() #desenha lado brando dir
         glColor3f(0.933,0.933,0.933) # vermelho, verde, azul
-        glTranslatef(0, 10.3, 0)
-        glScalef(15,2.2,1)
+        glTranslatef(0, 10.1, 0)
+        glScalef(12, 2.4, 1)
         cubo.desenha(True)
         glPopMatrix()
         
         glPushMatrix() #desenha lado brando esq
         glColor3f(0.933,0.933,0.933) # vermelho, verde, azul
-        glTranslatef(0, 10.3, 0)
-        glScalef(-15,2.2,1)
+        glTranslatef(0, 10.1, 0)
+        glScalef(-12, 2.4, 1)
         cubo.desenha(True)
         glPopMatrix()
 
         glPushMatrix() #desenha lado cinza dir
         glColor3f(0.753,0.753,0.753) # vermelho, verde, azul
         glTranslatef(0,9.7,0)
-        glScalef(5,2.8, 1)
+        glScalef(5, 2.8, 1)
         cubo.desenha(True)
         glPopMatrix()
 
-        glPushMatrix() #desenha lado cinza dir
+        glPushMatrix() #desenha lado cinza esq
         glColor3f(0.753,0.753,0.753) # vermelho, verde, azul
         glTranslatef(0,9.7,0)
-        glScalef(-5,2.8, 1)
+        glScalef(-5, 2.8, 1)
         cubo.desenha(True)
         glPopMatrix()
 
@@ -348,12 +350,53 @@ class Placar:
 
         glPopMatrix()
         
-        glPushMatrix() # 
-        jogador1 = Jogador(1.5, self.time1, glm.vec3(-14, 10.6, 0))
-        jogador2 = Jogador(1.5, self.time2, glm.vec3(14, 10.6, 0))
+        glPushMatrix() # times
+        jogador1 = Jogador(1.5, TIME[self.time1], glm.vec3(-11, 10.52, 0))
+        jogador2 = Jogador(1.5, TIME[self.time2], glm.vec3(11, 10.52, 0))
 
         jogador1.desenha()
         jogador2.desenha()
+        glPopMatrix()
+
+        glPushMatrix() #desenha o nome esq
+        glTranslatef(-9, 9.9, 0)
+        glScalef(2.4, 1.35, 1)
+        glBindTexture(GL_TEXTURE_2D, SIGLAS[self.time1])
+        cubo.desenha(True)
+        glBindTexture(GL_TEXTURE_2D, 0)
+        glPopMatrix()
+
+        glPushMatrix() #desenha o nome direito
+        glTranslatef(6, 9.9, 0)
+        glScalef(2.4, 1.35, 1)
+        glBindTexture(GL_TEXTURE_2D, SIGLAS[self.time2])
+        cubo.desenha(True)
+        glBindTexture(GL_TEXTURE_2D, 0)
+        glPopMatrix()
+
+        glPushMatrix() #desenha a logo
+        glColor(1, 1, 1)
+        glTranslatef(-1, 9.1, 0)
+        glScalef(2, 2, 1)
+        cubo.desenha(True)
+        glPopMatrix()
+
+        glPushMatrix() #desenha o placar dir
+        glColor(1, 1, 1)
+        glTranslatef(2.5, 9.65, 0)
+        glScalef(1.5, 1.5, 1)
+        glBindTexture(GL_TEXTURE_2D, PLACAR[self.score1])
+        cubo.desenha(True)
+        glBindTexture(GL_TEXTURE_2D, 0)
+        glPopMatrix()
+
+        glPushMatrix() #desenha o placar esq
+        glColor(1, 1, 1)
+        glTranslatef(-4, 9.65, 0)
+        glScalef(1.5, 1.5, 1)
+        glBindTexture(GL_TEXTURE_2D, PLACAR[self.score2])
+        cubo.desenha(True)
+        glBindTexture(GL_TEXTURE_2D, 0)
         glPopMatrix()
 
 class Game:
@@ -386,13 +429,21 @@ class Game:
         texBola = carregaTextura('Texturas/bola.png')
         texProgBar = carregaTextura('Texturas/arrow.png')
         texGol = carregaTextura('Texturas/trave.png') 
+
         for i in TIME:
             TIME[i] = carregaTextura(f'TIMES PNG/{i}.png')
+            SIGLAS[i] = carregaTextura(f'Siglas/{i}.png')
+
+        for i in range(0, 6):
+            PLACAR[f'{i}'] = carregaTextura(f'Placar/{i}.png')
+
         self.campo = Campo(campoLar, campoAlt)
         self.bola = Bola(bolaRaio)
-        self.timeA = Time(TIME['belgica'], FORMATION['1-2-1-1'], False)
-        self.timeB = Time(TIME['brasil'], FORMATION['1-2-2'], True)
-        self.placar = Placar(self.timeA.escudo, self.timeB.escudo)
+        self.nomeA = 'belgica' # Alterar variaveis
+        self.nomeB = 'brasil'
+        self.timeA = Time(self.nomeA, FORMATION['1-2-1-1'], False)
+        self.timeB = Time(self.nomeB, FORMATION['1-2-2'], True)
+        self.placar = Placar(self.nomeA, self.nomeB)
 
     def desenha(self):
         glClear(GL_COLOR_BUFFER_BIT)
