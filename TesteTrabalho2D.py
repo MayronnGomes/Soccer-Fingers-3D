@@ -28,6 +28,7 @@ angleProgressbar = 0.0
 forca = glm.vec3(0.0, 0.0, 0.0)
 deslocamento = glm.vec3(0.0, 0.0, 0.0)
 velocidade = glm.vec3(0.0, 0.0, 0.0)
+winner = ""
 
 TIME = {
     "belgica": 0,
@@ -201,22 +202,15 @@ class Campo:
         else:
             return glm.vec3(0, 0, 0), False
         
-    def colisao_gol(self, bola): # ERRO
-        global mov
-        if (abs(bola.pos.x) + bolaRaio/2 >= campoLar/2):
-            # if (2.4 > bola.pos.y + bolaRaio/2) and (bola.pos.y - bolaRaio/2 > -2.4):
-            if abs(bola.pos.x) - bolaRaio/2 > campoLar/2:
-                print('gol')
-                # stop move
-                # mov = False
-                return True
-            else:
-                return False
-            """if (2.4 <= bola.pos.y + bolaRaio/2) or (-2.4 >= bola.pos.y - bolaRaio/2): #CORRETO
-                recalcMov(glm.vec3(0, 1, 0))
-                return True"""
-        else: 
-            return False  
+    def colisao_gol(self, bola, placar):
+        if (bola.pos.x - bolaRaio/2 > 15) and (abs(bola.pos.y) + bolaRaio/2 <= 2.4): # gol direito
+            placar.score1 += 1
+            return True
+        elif (bola.pos.x + bolaRaio/2 < -15) and (abs(bola.pos.y) + bolaRaio/2 <= 2.4): # gol esquerdo
+            placar.score2 += 1
+            return True
+        else:
+            return False
 
 class Jogador:
 
@@ -296,8 +290,8 @@ class Placar:
     def __init__(self, time1, time2):
         self.time1 = time1
         self.time2 = time2
-        self.score1 = '0'
-        self.score2 = '0'
+        self.score1 = 0
+        self.score2 = 0
 
     def desenha(self):
         cubo = Cube()
@@ -381,20 +375,20 @@ class Placar:
         cubo.desenha(True)
         glPopMatrix()
 
-        glPushMatrix() #desenha o placar dir
-        glColor(1, 1, 1)
-        glTranslatef(2.5, 9.65, 0)
-        glScalef(1.5, 1.5, 1)
-        glBindTexture(GL_TEXTURE_2D, PLACAR[self.score1])
-        cubo.desenha(True)
-        glBindTexture(GL_TEXTURE_2D, 0)
-        glPopMatrix()
-
         glPushMatrix() #desenha o placar esq
         glColor(1, 1, 1)
         glTranslatef(-4, 9.65, 0)
         glScalef(1.5, 1.5, 1)
-        glBindTexture(GL_TEXTURE_2D, PLACAR[self.score2])
+        glBindTexture(GL_TEXTURE_2D, PLACAR[str(self.score1)])
+        cubo.desenha(True)
+        glBindTexture(GL_TEXTURE_2D, 0)
+        glPopMatrix()
+
+        glPushMatrix() #desenha o placar dir
+        glColor(1, 1, 1)
+        glTranslatef(2.5, 9.65, 0)
+        glScalef(1.5, 1.5, 1)
+        glBindTexture(GL_TEXTURE_2D, PLACAR[str(self.score2)])
         cubo.desenha(True)
         glBindTexture(GL_TEXTURE_2D, 0)
         glPopMatrix()
@@ -488,7 +482,7 @@ class Game:
         glViewport(0,0,w,h) 
 
     def timer(self, v):
-        global mov, forca, angleProgressbar, deslocamento
+        global mov, forca, angleProgressbar, deslocamento, velocidade
         glutTimerFunc(int(1000/FPS), self.timer, 0)
 
         if mov:
@@ -508,7 +502,20 @@ class Game:
 
                 normal, colisao_campo = self.campo.verifica_colisao(self.bola)
                 colisao_jogador = False
-                if colisao_campo: # colisão no campo
+
+                if self.campo.colisao_gol(self.bola, self.placar):
+                    mov = False
+                    forca.x = forca.y = forca.z = 0
+                    deslocamento.x = deslocamento.y = deslocamento.z = 0
+                    velocidade.x = velocidade.y = velocidade.z = 0
+                    angleProgressbar = 0.0
+                    self.bola.pos = glm.vec3(0, 0, 0)
+
+                    if self.vencedor(self.placar):
+                        # self.desenha(winner) # desenha uma mensagem de vencedor
+                        print(f'vencedor {winner}') 
+
+                elif colisao_campo: # colisão no campo
                     recalcMov(normal)
                 # elif self.campo.colisao_gol(self.bola):
                 #     # print('colisão gol')
@@ -581,6 +588,17 @@ class Game:
             forca.x = normalized_x - self.bola.pos.x
             forca.y = normalized_y - self.bola.pos.y
             angleProgressbar = math.degrees(math.atan2(forca.y, forca.x))
+
+    def vencedor(self, placar):
+        global winner
+        if placar.score1 == 5:
+            winner = placar.time1
+            return True
+        elif placar.score2 == 5:
+            winner = placar.time2
+            return True
+        else:
+            return False
 
 if __name__ == "__main__":
     game = Game()
