@@ -12,7 +12,7 @@ campoLar = 30
 campoAlt = 15
 bolaRaio = 1
 mundoLar  = 10
-mundoAlt  = 10
+mundoAlt  = 12
 janelaLar = 960
 janelaAlt = 540
 dir = glm.vec3(0, bolaRaio, 0)
@@ -30,6 +30,8 @@ deslocamento = glm.vec3(0.0, 0.0, 0.0)
 velocidade = glm.vec3(0.0, 0.0, 0.0)
 winner = ""
 
+OPTIONS = [glm.vec3(-4.5, 3.3, 0), glm.vec3(-5.5, 0.6, 0), glm.vec3(-3.5, -2, 0)] # x = -4.5 ; -5.5 ; -3.5      y = 3.3 ; 0.6 ; -2
+
 TIME = {
     "belgica": 0,
     "brasil": 0,
@@ -40,6 +42,12 @@ TIME = {
 FORMATION = {
     "1-2-2":   [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-campoLar/4, -5, 0), glm.vec3(-campoLar/4, 5, 0), glm.vec3(-3, -2, 0), glm.vec3(-3, 2, 0)],
     "1-2-1-1": [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-campoLar/4 - 1, -4, 0), glm.vec3(-campoLar/4 - 1, 4, 0), glm.vec3(-3, 0, 0), glm.vec3(-7, 0, 0)]
+}
+
+TELAS = {"inicial": 0,
+         "times": 0,
+         "gol": 0,
+         "vencedor": 0
 }
 
 SIGLAS = {}
@@ -405,6 +413,9 @@ class Game:
         self.inicio()
         glutTimerFunc(int(1000/FPS), self.timer, 0)      
         # glutFullScreen()
+        glutKeyboardFunc(self.tecladoASCII)
+        glutSpecialFunc(self.tecladoEspecial)
+        glutSpecialUpFunc(self.tecladoEspecialUp)
         glutReshapeFunc(self.reshape)
         glutDisplayFunc(self.desenha)
         glutMouseFunc(self.mouse)
@@ -431,6 +442,8 @@ class Game:
         for i in range(0, 6):
             PLACAR[f'{i}'] = carregaTextura(f'Placar/{i}.png')
 
+        TELAS["inicial"] = carregaTextura(f'Telas/inicial.png')
+
         self.campo = Campo(campoLar, campoAlt)
         self.bola = Bola(bolaRaio)
         self.nomeA = 'belgica' # Alterar variaveis
@@ -438,39 +451,61 @@ class Game:
         self.timeA = Time(self.nomeA, FORMATION['1-2-1-1'], False)
         self.timeB = Time(self.nomeB, FORMATION['1-2-2'], True)
         self.placar = Placar(self.nomeA, self.nomeB)
+        self.option = 0
+        self.tela = "inicial"
 
     def desenha(self):
         glClear(GL_COLOR_BUFFER_BIT)
 
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glOrtho(-mundoLar, mundoLar, -mundoAlt + 2, mundoAlt + 2, -1, 1)
+        glOrtho(-mundoLar, mundoLar, -mundoAlt, mundoAlt, -1, 1)
 
-        glPushMatrix()
-        glTranslatef(-(self.campo.largura/2), -(self.campo.altura/2), 0)
-        self.campo.desenha()
-        self.campo.desenha_gol()
+        if self.tela == "inicial":
+            cube = Cube()
+            triangule = Triangle()
 
-        glPushMatrix()
-        glTranslatef(self.campo.largura/2, self.campo.altura/2, 0)
-        
-        glPushMatrix()
-        glTranslatef(-self.bola.raio/2, -self.bola.raio/2, 0)
-        glTranslatef(self.bola.pos.x, self.bola.pos.y, self.bola.pos.z)
-        glScalef(self.bola.raio, self.bola.raio, 1)
-        self.bola.desenha()
-        glPopMatrix()
+            glPushMatrix()
+            glTranslatef(-mundoLar, -mundoAlt, 0)
+            glScalef(2 * mundoLar, 2 * mundoAlt, 1)
+            glBindTexture(GL_TEXTURE_2D, TELAS[self.tela])
+            cube.desenha(True)
+            glBindTexture(GL_TEXTURE_2D, 0)
+            glPopMatrix()
 
-        self.timeA.desenha()
-        self.timeB.desenha()
+            glPushMatrix()
+            glTranslatef(OPTIONS[self.option].x, OPTIONS[self.option].y, OPTIONS[self.option].z)
+            glRotatef(135, 0, 0, 1)
+            triangule.desenha(True)
+            glPopMatrix()
+            
+        elif self.tela == "jogo":
+            
+            glPushMatrix()
+            glTranslatef(-(self.campo.largura/2), -(self.campo.altura/2), 0)
+            self.campo.desenha()
+            self.campo.desenha_gol()
 
-        glPopMatrix()
-        glPopMatrix()
+            glPushMatrix()
+            glTranslatef(self.campo.largura/2, self.campo.altura/2, 0)
+            
+            glPushMatrix()
+            glTranslatef(-self.bola.raio/2, -self.bola.raio/2, 0)
+            glTranslatef(self.bola.pos.x, self.bola.pos.y, self.bola.pos.z)
+            glScalef(self.bola.raio, self.bola.raio, 1)
+            self.bola.desenha()
+            glPopMatrix()
 
-        if(progressbar):
-            self.bola.desenha_progressbar()
+            self.timeA.desenha()
+            self.timeB.desenha()
 
-        self.placar.desenha()
+            glPopMatrix()
+            glPopMatrix()
+
+            if(progressbar):
+                self.bola.desenha_progressbar()
+
+            self.placar.desenha()
 
         glutSwapBuffers()
 
@@ -588,6 +623,25 @@ class Game:
             forca.x = normalized_x - self.bola.pos.x
             forca.y = normalized_y - self.bola.pos.y
             angleProgressbar = math.degrees(math.atan2(forca.y, forca.x))
+
+    def tecladoASCII(self, key, x, y):
+        if key == b'\r':
+            if self.option == 0:
+                self.tela = "jogo"
+            elif self.option == 1:
+                print("options")
+            elif self.option == 2:
+                glutLeaveMainLoop()
+
+    def tecladoEspecial(self, key, x, y):
+        if key == GLUT_KEY_DOWN:
+            self.option += 1 if self.option < 2 else 0
+        elif key == GLUT_KEY_UP:
+            self.option -= 1 if self.option > 0 else 0
+        
+    def tecladoEspecialUp(self, key, x, y):
+        if key == GLUT_KEY_DOWN or key == GLUT_KEY_UP:
+            glutPostRedisplay() 
 
     def vencedor(self, placar):
         global winner
