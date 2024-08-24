@@ -38,7 +38,8 @@ TIME = {
 }
 
 OPTIONS = [glm.vec3(-4.5, 3.3, 0), glm.vec3(-5.5, 0.6, 0), glm.vec3(-3.5, -2, 0), glm.vec3(4.35, 0, 0)] # 0-2: Tela Inicial | 3: Tela Times
-OPTIONS.extend(TIME.keys()) # 4-?: Times
+
+OPTIONSTIMES = [i for i in TIME.keys()]
 
 FORMATION = {
     "1-2-2":   [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-campoLar/4, -5, 0), glm.vec3(-campoLar/4, 5, 0), glm.vec3(-3, -2, 0), glm.vec3(-3, 2, 0)],
@@ -456,12 +457,14 @@ class Game:
 
         self.campo = Campo(campoLar, campoAlt)
         self.bola = Bola(bolaRaio)
-        self.nomeA = 'belgica' # Alterar variaveis
-        self.nomeB = 'brasil'
-        self.timeA = Time(self.nomeA, FORMATION['1-2-1-1'], False)
-        self.timeB = Time(self.nomeB, FORMATION['1-2-2'], True)
-        self.placar = Placar(self.nomeA, self.nomeB)
+        self.nomeA = ''
+        self.nomeB = ''
+        self.timeA = None
+        self.timeB = None
+        self.placar = None
         self.option = 0
+        self.optionTimeA = 0
+        self.optionTimeB = 0
         self.tela = "inicial"
 
     def desenha(self):
@@ -502,8 +505,8 @@ class Game:
             glPopMatrix()
 
             glPushMatrix() # Seleção
-            # if self.timeA != "":
-            #     glScalef(-1, 1, 1)
+            if self.nomeA != "":
+                glScalef(-1, 1, 1)
 
             glTranslatef(-12.35, 0, 0)
             
@@ -524,7 +527,7 @@ class Game:
             glPushMatrix() # time esquerdo
             glTranslatef(-15.35, -3, 0)
             glScalef(6, 6, 1)
-            glBindTexture(GL_TEXTURE_2D, TIME['brasil'])
+            glBindTexture(GL_TEXTURE_2D, TIME[OPTIONSTIMES[self.optionTimeA]])
             cube.desenha(True)
             glBindTexture(GL_TEXTURE_2D, 0)
             glPopMatrix()
@@ -533,7 +536,7 @@ class Game:
             glScalef(-1, 1, 1)
             glTranslatef(-15.35, -3, 0)
             glScalef(6, 6, 1)
-            glBindTexture(GL_TEXTURE_2D, TIME['brasil'])
+            glBindTexture(GL_TEXTURE_2D, TIME[OPTIONSTIMES[self.optionTimeB]])
             cube.desenha(True)
             glBindTexture(GL_TEXTURE_2D, 0)
             glPopMatrix()
@@ -541,7 +544,7 @@ class Game:
             glPushMatrix() # nome time esquerdo
             glTranslatef(-13.95, 5.35, 0)
             glScalef(3.2, 1.8, 1)
-            glBindTexture(GL_TEXTURE_2D, SIGLAS['brasil'])
+            glBindTexture(GL_TEXTURE_2D, SIGLAS[OPTIONSTIMES[self.optionTimeA]])
             cube.desenha(True)
             glBindTexture(GL_TEXTURE_2D, 0)
             glPopMatrix()
@@ -550,7 +553,7 @@ class Game:
             glScalef(-1, 1, 1)
             glTranslatef(-13.95, 5.35, 0)
             glScalef(3.2, 1.8, 1)
-            glBindTexture(GL_TEXTURE_2D, SIGLAS['brasil'])
+            glBindTexture(GL_TEXTURE_2D, SIGLAS[OPTIONSTIMES[self.optionTimeB]])
             cube.desenha(True, invertido=True)
             glBindTexture(GL_TEXTURE_2D, 0)
             glPopMatrix()
@@ -703,23 +706,49 @@ class Game:
             angleProgressbar = math.degrees(math.atan2(forca.y, forca.x))
 
     def tecladoASCII(self, key, x, y):
-        if key == b'\r' and self.tela == "inicial":
-            if self.option == 0:
-                self.tela = "times"
-                self.option = 3
-            elif self.option == 1:
-                print("options")
-            elif self.option == 2:
-                glutLeaveMainLoop()
+        if key == b'\r':
+            if self.tela == "inicial":
+                if self.option == 0:
+                    self.tela = "times"
+                    self.option = 3
+                elif self.option == 1:
+                    print("options")
+                elif self.option == 2:
+                    glutLeaveMainLoop()
+            elif self.tela == "times":
+                if self.nomeA == "":
+                    self.nomeA = OPTIONSTIMES[self.optionTimeA]
+                    self.timeA = Time(self.nomeA, FORMATION['1-2-2'], False)
+                else:
+                    self.nomeB = OPTIONSTIMES[self.optionTimeB]
+                    self.timeB = Time(self.nomeB, FORMATION['1-2-2'], True)
+                    self.placar = Placar(self.nomeA, self.nomeB)
+                    self.tela = "jogo"
+
+
 
     def tecladoEspecial(self, key, x, y):
-        if key == GLUT_KEY_DOWN and self.tela == "inicial":
-            self.option += 1 if self.option < 2 else 0
-        elif key == GLUT_KEY_UP and self.tela == "inicial":
-            self.option -= 1 if self.option > 0 else 0
-        
+        if self.tela == "inicial":
+            if key == GLUT_KEY_DOWN:
+                self.option += 1 if self.option < 2 else 0
+            elif key == GLUT_KEY_UP:
+                self.option -= 1 if self.option > 0 else 0
+        elif self.tela == "times":
+            if self.nomeA == "":
+                if key == GLUT_KEY_RIGHT:
+                    self.optionTimeA += 1 if self.optionTimeA < (len(OPTIONSTIMES) - 1) else 0
+                elif key == GLUT_KEY_LEFT:
+                    self.optionTimeA -= 1 if self.optionTimeA > 0 else 0
+            else:
+                if key == GLUT_KEY_RIGHT:
+                    self.optionTimeB += 1 if self.optionTimeB < (len(OPTIONSTIMES) - 1) else 0
+                elif key == GLUT_KEY_LEFT:
+                    self.optionTimeB -= 1 if self.optionTimeB > 0 else 0
+         
     def tecladoEspecialUp(self, key, x, y):
         if (key == GLUT_KEY_DOWN or key == GLUT_KEY_UP) and self.tela == "inicial":
+            glutPostRedisplay()
+        elif (key == GLUT_KEY_RIGHT or key == GLUT_KEY_LEFT) and self.tela == "times":
             glutPostRedisplay()
 
     def vencedor(self, placar):
