@@ -12,7 +12,7 @@ campoLar = 30
 campoAlt = 15
 bolaRaio = 1
 mundoLar  = 10
-mundoAlt  = 10
+mundoAlt  = 12
 janelaLar = 960
 janelaAlt = 540
 dir = glm.vec3(0, bolaRaio, 0)
@@ -28,6 +28,7 @@ angleProgressbar = 0.0
 forca = glm.vec3(0.0, 0.0, 0.0)
 deslocamento = glm.vec3(0.0, 0.0, 0.0)
 velocidade = glm.vec3(0.0, 0.0, 0.0)
+winner = ""
 
 TIME = {
     "belgica": 0,
@@ -36,10 +37,24 @@ TIME = {
     "italia": 0
 }
 
+OPTIONS = [glm.vec3(-4.5, 3.3, 0), glm.vec3(-5.5, 0.6, 0), glm.vec3(-3.5, -2, 0), glm.vec3(4.35, 0, 0)] # 0-2: Tela Inicial | 3: Tela Times
+
+OPTIONSTIMES = [i for i in TIME.keys()]
+
 FORMATION = {
     "1-2-2":   [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-campoLar/4, -5, 0), glm.vec3(-campoLar/4, 5, 0), glm.vec3(-3, -2, 0), glm.vec3(-3, 2, 0)],
     "1-2-1-1": [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-campoLar/4 - 1, -4, 0), glm.vec3(-campoLar/4 - 1, 4, 0), glm.vec3(-3, 0, 0), glm.vec3(-7, 0, 0)]
 }
+
+TELAS = {"inicial": 0,
+         "times": 0#,
+        #  "gol": 0,
+        #  "vencedor": 0
+}
+
+SIGLAS = {}
+
+PLACAR = {}
 
 def recalcMov(normal):
     global deslocamento, forca, velocidade
@@ -95,19 +110,27 @@ class Cube:
     def __init__(self) -> None:
         pass
 
-    def desenha(self, fill=False):
+    def desenha(self, fill=False, invertido=False):
 
-        if (fill):
+        if fill:
             glPolygonMode( GL_FRONT_AND_BACK, GL_FILL )
         else:
             glPolygonMode( GL_FRONT_AND_BACK, GL_LINE )
 
-        glBegin(GL_QUADS)
-        glTexCoord2f(0, 0); glVertex2f(0, 0)
-        glTexCoord2f(0, 1); glVertex2f(0, 1)
-        glTexCoord2f(1, 1); glVertex2f(1, 1)
-        glTexCoord2f(1, 0); glVertex2f(1, 0)
-        glEnd()
+        if invertido:
+            glBegin(GL_QUADS)
+            glTexCoord2f(0, 0); glVertex2f(1, 0)
+            glTexCoord2f(0, 1); glVertex2f(1, 1)
+            glTexCoord2f(1, 1); glVertex2f(0, 1)
+            glTexCoord2f(1, 0); glVertex2f(0, 0)
+            glEnd()
+        else:
+            glBegin(GL_QUADS)
+            glTexCoord2f(0, 0); glVertex2f(0, 0)
+            glTexCoord2f(0, 1); glVertex2f(0, 1)
+            glTexCoord2f(1, 1); glVertex2f(1, 1)
+            glTexCoord2f(1, 0); glVertex2f(1, 0)
+            glEnd()
 
 class Triangle:
 
@@ -197,22 +220,15 @@ class Campo:
         else:
             return glm.vec3(0, 0, 0), False
         
-    def colisao_gol(self, bola): # ERRO
-        global mov
-        if (abs(bola.pos.x) + bolaRaio/2 >= campoLar/2):
-            # if (2.4 > bola.pos.y + bolaRaio/2) and (bola.pos.y - bolaRaio/2 > -2.4):
-            if abs(bola.pos.x) - bolaRaio/2 > campoLar/2:
-                print('gol')
-                # stop move
-                # mov = False
-                return True
-            else:
-                return False
-            """if (2.4 <= bola.pos.y + bolaRaio/2) or (-2.4 >= bola.pos.y - bolaRaio/2): #CORRETO
-                recalcMov(glm.vec3(0, 1, 0))
-                return True"""
-        else: 
-            return False  
+    def colisao_gol(self, bola, placar):
+        if (bola.pos.x - bolaRaio/2 > 15) and (abs(bola.pos.y) + bolaRaio/2 <= 2.4): # gol direito
+            placar.score1 += 1
+            return True
+        elif (bola.pos.x + bolaRaio/2 < -15) and (abs(bola.pos.y) + bolaRaio/2 <= 2.4): # gol esquerdo
+            placar.score2 += 1
+            return True
+        else:
+            return False
 
 class Jogador:
 
@@ -241,7 +257,7 @@ class Jogador:
 class Time:
 
     def __init__(self, escudo, formacao, visitante):
-        self.escudo = escudo
+        self.escudo = TIME[escudo]
         self.formacao = formacao
         self.visitante = visitante
         self.jogadores = [Jogador(2, self.escudo, (self.formacao[i]*(-1) if self.visitante else self.formacao[i])) for i in range(5)]
@@ -289,15 +305,111 @@ class Bola:
 
 class Placar:
 
-    def __init__(self, player1, player2):
-        self.player1 = player1
-        self.player2 = player2
+    def __init__(self, time1, time2):
+        self.time1 = time1
+        self.time2 = time2
         self.score1 = 0
         self.score2 = 0
-        self.timeSec = 30
 
     def desenha(self):
-        pass
+        cubo = Cube()
+
+        glPushMatrix()
+        glTranslatef(0,3,0)
+        glScalef(1,1/1.5,1)
+        
+        glPushMatrix() #desenha o fundo cinza
+        glColor3f(0.188, 0.184, 0.176) # vermelho, verde, azul
+        glTranslatef(-12, 8.3, 0)
+        glScalef(24, 4.2, 1)
+        cubo.desenha(True)
+        glPopMatrix()
+        
+        glPushMatrix() #desenha lado brando dir
+        glColor3f(0.933,0.933,0.933) # vermelho, verde, azul
+        glTranslatef(0, 10.1, 0)
+        glScalef(12, 2.4, 1)
+        cubo.desenha(True)
+        glPopMatrix()
+        
+        glPushMatrix() #desenha lado brando esq
+        glColor3f(0.933,0.933,0.933) # vermelho, verde, azul
+        glTranslatef(0, 10.1, 0)
+        glScalef(-12, 2.4, 1)
+        cubo.desenha(True)
+        glPopMatrix()
+
+        glPushMatrix() #desenha lado cinza dir
+        glColor3f(0.753,0.753,0.753) # vermelho, verde, azul
+        glTranslatef(0,9.7,0)
+        glScalef(5, 2.8, 1)
+        cubo.desenha(True)
+        glPopMatrix()
+
+        glPushMatrix() #desenha lado cinza esq
+        glColor3f(0.753,0.753,0.753) # vermelho, verde, azul
+        glTranslatef(0,9.7,0)
+        glScalef(-5, 2.8, 1)
+        cubo.desenha(True)
+        glPopMatrix()
+
+        glPushMatrix() # desenha o quadrado do meio
+        glColor3f(0.290, 0.290, 0.282) # vermelho, verde, azul
+        glTranslatef(-1.5,8.8,0)
+        glScalef(3, 3.7, 1)
+        cubo.desenha(True)
+        glPopMatrix()
+
+        glPopMatrix()
+        
+        glPushMatrix() # times
+        jogador1 = Jogador(1.5, TIME[self.time1], glm.vec3(-11, 10.52, 0))
+        jogador2 = Jogador(1.5, TIME[self.time2], glm.vec3(11, 10.52, 0))
+
+        jogador1.desenha()
+        jogador2.desenha()
+        glPopMatrix()
+
+        glPushMatrix() #desenha o nome esq
+        glTranslatef(-9, 9.9, 0)
+        glScalef(2.4, 1.35, 1)
+        glBindTexture(GL_TEXTURE_2D, SIGLAS[self.time1])
+        cubo.desenha(True)
+        glBindTexture(GL_TEXTURE_2D, 0)
+        glPopMatrix()
+
+        glPushMatrix() #desenha o nome direito
+        glTranslatef(6, 9.9, 0)
+        glScalef(2.4, 1.35, 1)
+        glBindTexture(GL_TEXTURE_2D, SIGLAS[self.time2])
+        cubo.desenha(True)
+        glBindTexture(GL_TEXTURE_2D, 0)
+        glPopMatrix()
+
+        glPushMatrix() #desenha a logo
+        glColor(1, 1, 1)
+        glTranslatef(-1, 9.1, 0)
+        glScalef(2, 2, 1)
+        cubo.desenha(True)
+        glPopMatrix()
+
+        glPushMatrix() #desenha o placar esq
+        glColor(1, 1, 1)
+        glTranslatef(-4, 9.65, 0)
+        glScalef(1.5, 1.5, 1)
+        glBindTexture(GL_TEXTURE_2D, PLACAR[str(self.score1)])
+        cubo.desenha(True)
+        glBindTexture(GL_TEXTURE_2D, 0)
+        glPopMatrix()
+
+        glPushMatrix() #desenha o placar dir
+        glColor(1, 1, 1)
+        glTranslatef(2.5, 9.65, 0)
+        glScalef(1.5, 1.5, 1)
+        glBindTexture(GL_TEXTURE_2D, PLACAR[str(self.score2)])
+        cubo.desenha(True)
+        glBindTexture(GL_TEXTURE_2D, 0)
+        glPopMatrix()
 
 class Game:
 
@@ -311,6 +423,9 @@ class Game:
         self.inicio()
         glutTimerFunc(int(1000/FPS), self.timer, 0)      
         # glutFullScreen()
+        glutKeyboardFunc(self.tecladoASCII)
+        glutSpecialFunc(self.tecladoEspecial)
+        glutSpecialUpFunc(self.tecladoEspecialUp)
         glutReshapeFunc(self.reshape)
         glutDisplayFunc(self.desenha)
         glutMouseFunc(self.mouse)
@@ -329,43 +444,149 @@ class Game:
         texBola = carregaTextura('Texturas/bola.png')
         texProgBar = carregaTextura('Texturas/arrow.png')
         texGol = carregaTextura('Texturas/trave.png') 
+
         for i in TIME:
-            TIME[i] = carregaTextura(f'TIMES PNG/{i}.png')
+            TIME[i] = carregaTextura(f'Texturas/TIMES PNG/{i}.png')
+            SIGLAS[i] = carregaTextura(f'Texturas/Siglas/{i}.png')
+
+        for i in range(0, 6):
+            PLACAR[f'{i}'] = carregaTextura(f'Texturas/Placar/{i}.png')
+        
+        for i in TELAS.keys():
+            TELAS[i] = carregaTextura(f'Texturas/Telas/{i}.png')        
+
         self.campo = Campo(campoLar, campoAlt)
         self.bola = Bola(bolaRaio)
-        self.timeA = Time(TIME['belgica'], FORMATION['1-2-1-1'], False)
-        self.timeB = Time(TIME['brasil'], FORMATION['1-2-2'], True)
+        self.nomeA = ''
+        self.nomeB = ''
+        self.timeA = None
+        self.timeB = None
+        self.placar = None
+        self.option = 0
+        self.optionTimeA = 0
+        self.optionTimeB = 0
+        self.tela = "inicial"
 
     def desenha(self):
         glClear(GL_COLOR_BUFFER_BIT)
 
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glOrtho(-mundoLar, mundoLar, -mundoAlt + 2, mundoAlt + 2, -1, 1)
+        glOrtho(-mundoLar, mundoLar, -mundoAlt, mundoAlt, -1, 1)
 
-        glPushMatrix()
-        glTranslatef(-(self.campo.largura/2), -(self.campo.altura/2), 0)
-        self.campo.desenha()
-        self.campo.desenha_gol()
+        if self.tela == "inicial":
+            cube = Cube()
+            triangule = Triangle()
 
-        glPushMatrix()
-        glTranslatef(self.campo.largura/2, self.campo.altura/2, 0)
-        
-        glPushMatrix()
-        glTranslatef(-self.bola.raio/2, -self.bola.raio/2, 0)
-        glTranslatef(self.bola.pos.x, self.bola.pos.y, self.bola.pos.z)
-        glScalef(self.bola.raio, self.bola.raio, 1)
-        self.bola.desenha()
-        glPopMatrix()
+            glPushMatrix()
+            glTranslatef(-mundoLar, -mundoAlt, 0)
+            glScalef(2 * mundoLar, 2 * mundoAlt, 1)
+            glBindTexture(GL_TEXTURE_2D, TELAS[self.tela])
+            cube.desenha(True)
+            glBindTexture(GL_TEXTURE_2D, 0)
+            glPopMatrix()
 
-        self.timeA.desenha()
-        self.timeB.desenha()
+            glPushMatrix()
+            glTranslatef(OPTIONS[self.option].x, OPTIONS[self.option].y, OPTIONS[self.option].z)
+            glRotatef(135, 0, 0, 1)
+            triangule.desenha(True)
+            glPopMatrix()
+            
+        elif self.tela == "times":
+            cube = Cube()
+            triangule = Triangle()
 
-        glPopMatrix()
-        glPopMatrix()
+            glPushMatrix() # tela
+            glTranslatef(-mundoLar, -mundoAlt, 0)
+            glScalef(2 * mundoLar, 2 * mundoAlt, 1)
+            glBindTexture(GL_TEXTURE_2D, TELAS[self.tela])
+            cube.desenha(True)
+            glBindTexture(GL_TEXTURE_2D, 0)
+            glPopMatrix()
 
-        if(progressbar):
-            self.bola.desenha_progressbar()
+            glPushMatrix() # Seleção
+            if self.nomeA != "":
+                glScalef(-1, 1, 1)
+
+            glTranslatef(-12.35, 0, 0)
+            
+            glPushMatrix()
+            glTranslatef(OPTIONS[self.option].x, OPTIONS[self.option].y, OPTIONS[self.option].z)
+            glRotatef(135, 0, 0, 1)
+            triangule.desenha(True)
+            glPopMatrix()
+            
+            glPushMatrix()
+            glScale(-1, 1, 1)
+            glTranslatef(OPTIONS[self.option].x, OPTIONS[self.option].y, OPTIONS[self.option].z)
+            glRotatef(135, 0, 0, 1)
+            triangule.desenha(True)
+            glPopMatrix()
+            glPopMatrix()
+
+            glPushMatrix() # time esquerdo
+            glTranslatef(-15.35, -3, 0)
+            glScalef(6, 6, 1)
+            glBindTexture(GL_TEXTURE_2D, TIME[OPTIONSTIMES[self.optionTimeA]])
+            cube.desenha(True)
+            glBindTexture(GL_TEXTURE_2D, 0)
+            glPopMatrix()
+            
+            glPushMatrix() # time direito
+            glScalef(-1, 1, 1)
+            glTranslatef(-15.35, -3, 0)
+            glScalef(6, 6, 1)
+            glBindTexture(GL_TEXTURE_2D, TIME[OPTIONSTIMES[self.optionTimeB]])
+            cube.desenha(True)
+            glBindTexture(GL_TEXTURE_2D, 0)
+            glPopMatrix()
+
+            glPushMatrix() # nome time esquerdo
+            glTranslatef(-13.95, 5.35, 0)
+            glScalef(3.2, 1.8, 1)
+            glBindTexture(GL_TEXTURE_2D, SIGLAS[OPTIONSTIMES[self.optionTimeA]])
+            cube.desenha(True)
+            glBindTexture(GL_TEXTURE_2D, 0)
+            glPopMatrix()
+            
+            glPushMatrix() # nome time direito
+            glScalef(-1, 1, 1)
+            glTranslatef(-13.95, 5.35, 0)
+            glScalef(3.2, 1.8, 1)
+            glBindTexture(GL_TEXTURE_2D, SIGLAS[OPTIONSTIMES[self.optionTimeB]])
+            cube.desenha(True, invertido=True)
+            glBindTexture(GL_TEXTURE_2D, 0)
+            glPopMatrix()
+
+            # escolhendo - escolhido
+
+        elif self.tela == "jogo":
+            
+            glPushMatrix()
+            glTranslatef(-(self.campo.largura/2), -(self.campo.altura/2), 0)
+            self.campo.desenha()
+            self.campo.desenha_gol()
+
+            glPushMatrix()
+            glTranslatef(self.campo.largura/2, self.campo.altura/2, 0)
+            
+            glPushMatrix()
+            glTranslatef(-self.bola.raio/2, -self.bola.raio/2, 0)
+            glTranslatef(self.bola.pos.x, self.bola.pos.y, self.bola.pos.z)
+            glScalef(self.bola.raio, self.bola.raio, 1)
+            self.bola.desenha()
+            glPopMatrix()
+
+            self.timeA.desenha()
+            self.timeB.desenha()
+
+            glPopMatrix()
+            glPopMatrix()
+
+            if(progressbar):
+                self.bola.desenha_progressbar()
+
+            self.placar.desenha()
 
         glutSwapBuffers()
 
@@ -377,7 +598,7 @@ class Game:
         glViewport(0,0,w,h) 
 
     def timer(self, v):
-        global mov, forca, angleProgressbar, deslocamento
+        global mov, forca, angleProgressbar, deslocamento, velocidade
         glutTimerFunc(int(1000/FPS), self.timer, 0)
 
         if mov:
@@ -397,7 +618,20 @@ class Game:
 
                 normal, colisao_campo = self.campo.verifica_colisao(self.bola)
                 colisao_jogador = False
-                if colisao_campo: # colisão no campo
+
+                if self.campo.colisao_gol(self.bola, self.placar):
+                    mov = False
+                    forca.x = forca.y = forca.z = 0
+                    deslocamento.x = deslocamento.y = deslocamento.z = 0
+                    velocidade.x = velocidade.y = velocidade.z = 0
+                    angleProgressbar = 0.0
+                    self.bola.pos = glm.vec3(0, 0, 0)
+
+                    if self.vencedor(self.placar):
+                        # self.desenha(winner) # desenha uma mensagem de vencedor
+                        print(f'vencedor {winner}') 
+
+                elif colisao_campo: # colisão no campo
                     recalcMov(normal)
                 # elif self.campo.colisao_gol(self.bola):
                 #     # print('colisão gol')
@@ -470,6 +704,63 @@ class Game:
             forca.x = normalized_x - self.bola.pos.x
             forca.y = normalized_y - self.bola.pos.y
             angleProgressbar = math.degrees(math.atan2(forca.y, forca.x))
+
+    def tecladoASCII(self, key, x, y):
+        if key == b'\r':
+            if self.tela == "inicial":
+                if self.option == 0:
+                    self.tela = "times"
+                    self.option = 3
+                elif self.option == 1:
+                    print("options")
+                elif self.option == 2:
+                    glutLeaveMainLoop()
+            elif self.tela == "times":
+                if self.nomeA == "":
+                    self.nomeA = OPTIONSTIMES[self.optionTimeA]
+                    self.timeA = Time(self.nomeA, FORMATION['1-2-2'], False)
+                else:
+                    self.nomeB = OPTIONSTIMES[self.optionTimeB]
+                    self.timeB = Time(self.nomeB, FORMATION['1-2-2'], True)
+                    self.placar = Placar(self.nomeA, self.nomeB)
+                    self.tela = "jogo"
+
+
+
+    def tecladoEspecial(self, key, x, y):
+        if self.tela == "inicial":
+            if key == GLUT_KEY_DOWN:
+                self.option += 1 if self.option < 2 else 0
+            elif key == GLUT_KEY_UP:
+                self.option -= 1 if self.option > 0 else 0
+        elif self.tela == "times":
+            if self.nomeA == "":
+                if key == GLUT_KEY_RIGHT:
+                    self.optionTimeA += 1 if self.optionTimeA < (len(OPTIONSTIMES) - 1) else 0
+                elif key == GLUT_KEY_LEFT:
+                    self.optionTimeA -= 1 if self.optionTimeA > 0 else 0
+            else:
+                if key == GLUT_KEY_RIGHT:
+                    self.optionTimeB += 1 if self.optionTimeB < (len(OPTIONSTIMES) - 1) else 0
+                elif key == GLUT_KEY_LEFT:
+                    self.optionTimeB -= 1 if self.optionTimeB > 0 else 0
+         
+    def tecladoEspecialUp(self, key, x, y):
+        if (key == GLUT_KEY_DOWN or key == GLUT_KEY_UP) and self.tela == "inicial":
+            glutPostRedisplay()
+        elif (key == GLUT_KEY_RIGHT or key == GLUT_KEY_LEFT) and self.tela == "times":
+            glutPostRedisplay()
+
+    def vencedor(self, placar):
+        global winner
+        if placar.score1 == 5:
+            winner = placar.time1
+            return True
+        elif placar.score2 == 5:
+            winner = placar.time2
+            return True
+        else:
+            return False
 
 if __name__ == "__main__":
     game = Game()
