@@ -38,7 +38,7 @@ TIME = {
     "italia": 0
 }
 
-OPTIONS = [glm.vec3(-4.5, 3.3, 0), glm.vec3(-5.5, 0.6, 0), glm.vec3(-3.5, -2, 0), glm.vec3(4.35, 0, 0)] # 0-2: Tela Inicial | 3: Tela Times
+OPTIONS = [glm.vec3(-4.5, 3.3, 0), glm.vec3(-5.5, 0.6, 0), glm.vec3(-3.5, -2, 0), glm.vec3(mundoLar * 0.45, 0, 0)] # 0-2: Tela Inicial | 3: Tela Times
 
 OPTIONSTIMES = [i for i in TIME.keys()]
 
@@ -439,7 +439,7 @@ class Game:
         glutCreateWindow('FullScreen')
         self.inicio()
         glutTimerFunc(int(1000/FPS), self.timer, 0)      
-        # glutFullScreen()
+        glutFullScreen()
         glutKeyboardFunc(self.tecladoASCII)
         glutSpecialFunc(self.tecladoEspecial)
         glutSpecialUpFunc(self.tecladoEspecialUp)
@@ -543,7 +543,7 @@ class Game:
             glPopMatrix()
 
             glPushMatrix() # time esquerdo
-            glTranslatef(-15.35, -3, 0)
+            glTranslatef(-mundoLar * 0.72, -3, 0)
             glScalef(6, 6, 1)
             glBindTexture(GL_TEXTURE_2D, TIME[OPTIONSTIMES[self.optionTimeA]])
             cube.desenha(True)
@@ -552,7 +552,7 @@ class Game:
             
             glPushMatrix() # time direito
             glScalef(-1, 1, 1)
-            glTranslatef(-15.35, -3, 0)
+            glTranslatef(-mundoLar * 0.72, -3, 0)
             glScalef(6, 6, 1)
             glBindTexture(GL_TEXTURE_2D, TIME[OPTIONSTIMES[self.optionTimeB]])
             cube.desenha(True)
@@ -560,7 +560,7 @@ class Game:
             glPopMatrix()
 
             glPushMatrix() # nome time esquerdo
-            glTranslatef(-13.95, 5.35, 0)
+            glTranslatef(-mundoLar * 0.65, 5.35, 0)
             glScalef(3.2, 1.8, 1)
             glBindTexture(GL_TEXTURE_2D, SIGLAS[OPTIONSTIMES[self.optionTimeA]])
             cube.desenha(True)
@@ -569,7 +569,7 @@ class Game:
             
             glPushMatrix() # nome time direito
             glScalef(-1, 1, 1)
-            glTranslatef(-13.95, 5.35, 0)
+            glTranslatef(-mundoLar * 0.65, 5.35, 0)
             glScalef(3.2, 1.8, 1)
             glBindTexture(GL_TEXTURE_2D, SIGLAS[OPTIONSTIMES[self.optionTimeB]])
             cube.desenha(True, invertido=True)
@@ -748,6 +748,7 @@ class Game:
                     self.tela = "jogo"
         elif key.lower() == b'f' and self.tela == "jogo":
             formation = True
+            glutPostRedisplay()
 
     def tecladoEspecial(self, key, x, y):
         if self.tela == "inicial":
