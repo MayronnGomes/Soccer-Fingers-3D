@@ -24,7 +24,6 @@ texProgBar = 0
 texGol = 0
 progressbar = False
 mov = False
-formation = False
 angleProgressbar = 0.0
 forca = glm.vec3(0.0, 0.0, 0.0)
 deslocamento = glm.vec3(0.0, 0.0, 0.0)
@@ -43,12 +42,20 @@ OPTIONS = [glm.vec3(-4.5, 3.3, 0), glm.vec3(-5.5, 0.6, 0), glm.vec3(-3.5, -2, 0)
 OPTIONSTIMES = [i for i in TIME.keys()]
 
 FORMATION = {
-    "1-2-2":   [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-campoLar/4, -5, 0), glm.vec3(-campoLar/4, 5, 0), glm.vec3(-3, -2, 0), glm.vec3(-3, 2, 0)],
-    "1-2-1-1": [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-campoLar/4 - 1, -4, 0), glm.vec3(-campoLar/4 - 1, 4, 0), glm.vec3(-3, 0, 0), glm.vec3(-7, 0, 0)]
+    "1": [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-campoLar/4 - 1, -4, 0), glm.vec3(-campoLar/4 - 1, 4, 0), glm.vec3(-7, 0, 0), glm.vec3(-3, 0, 0)],
+    "2": [glm.vec3(-campoLar/2 + 5, 2, 0), glm.vec3(-campoLar/2 + 5, -2, 0), glm.vec3(-campoLar/4 + 2.5, 5, 0), glm.vec3(-campoLar/4 + 2.5, -5, 0), glm.vec3(-3, 0, 0)],
+    "3": [glm.vec3(-campoLar/2 + 3, 2, 0), glm.vec3(-campoLar/2 + 3, -2, 0), glm.vec3(-campoLar/4 + 1, 0, 0), glm.vec3(-3, -5, 0), glm.vec3(-3, 5, 0)],
+    "4": [glm.vec3(-campoLar/2 + 4, -3.5, 0), glm.vec3(-campoLar/2 + 4, 3.5, 0), glm.vec3(-campoLar/4 + 1, 2, 0), glm.vec3(-campoLar/4 + 1, -2, 0), glm.vec3(-3, 0, 0)],
+    "5": [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-campoLar/4, -5, 0), glm.vec3(-campoLar/4, 5, 0), glm.vec3(-3, -2, 0), glm.vec3(-3, 2, 0)],
+    "6": [glm.vec3(-campoLar/2 + 4, 0, 0), glm.vec3(-7, -4, 0), glm.vec3(-7, 4, 0), glm.vec3(-7, 0, 0), glm.vec3(-3, 0, 0)],
+    "7": [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-3.5, -2, 0), glm.vec3(-3.5, 2, 0), glm.vec3(-3.5, -6, 0), glm.vec3(-3.5, 6, 0)],
+    "8": [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-6.5, -4, 0), glm.vec3(-6.5, 4, 0), glm.vec3(-campoLar/4 - 0.5, 0, 0), glm.vec3(-3, 0, 0)]
 }
 
 TELAS = {"inicial": 0,
-         "times": 0#,
+         "times": 0,
+         "formação1": 0,
+         "formação2": 0#,
         #  "gol": 0,
         #  "vencedor": 0
 }
@@ -269,6 +276,10 @@ class Time:
             i.desenha()
             glPopMatrix()
 
+    def alterarFormacao(self):
+        for i in range(0, 5):
+            self.jogadores[i].posicao = self.formacao[i]*(-1) if self.visitante else self.formacao[i]
+
 class Bola:
 
     def __init__(self, raio):
@@ -414,18 +425,80 @@ class Placar:
 
 class Formation:
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self):
+        self.option = 1
 
-    def desenha(self):
+    def desenha(self, tela):
         cube = Cube()
 
         glPushMatrix()
         glTranslatef(-mundoLar, -mundoAlt, 0)
         glScalef(2 * mundoLar, 2 * mundoAlt, 1)
-        glBindTexture(GL_TEXTURE_2D, TELAS['inicial'])
+        glBindTexture(GL_TEXTURE_2D, TELAS[tela])
         cube.desenha(True)
         glBindTexture(GL_TEXTURE_2D, 0)
+        glPopMatrix()
+
+        if self.option == 1:
+            glPushMatrix()
+            glScalef(-1, 1, 1)
+            glColor3f(0, 0, 1)
+            glTranslatef(10.9, -1.2, 0)
+            self.desenhaContorno()
+            glPopMatrix()
+        elif self.option == 2:
+            glPushMatrix()
+            glScalef(-1, 1, 1)
+            glColor3f(0, 0, 1)
+            glTranslatef(0.75, -1.2, 0)
+            self.desenhaContorno()
+            glPopMatrix()
+        elif self.option == 3:
+            glPushMatrix()
+            glColor3f(0, 0, 1)
+            glTranslatef(0.75, -1.2, 0)
+            self.desenhaContorno()
+            glPopMatrix()
+        elif self.option == 4:
+            glPushMatrix()
+            glColor3f(0, 0, 1)
+            glTranslatef(10.9, -1.2, 0)
+            self.desenhaContorno()
+            glPopMatrix()
+        elif self.option == 5:
+            glPushMatrix()
+            glScalef(-1, -1, 1)
+            glColor3f(0, 0, 1)
+            glTranslatef(10.9, 2.25, 0)
+            self.desenhaContorno()
+            glPopMatrix()
+        elif self.option == 6:
+            glPushMatrix()
+            glScalef(-1, -1, 1)
+            glColor3f(0, 0, 1)
+            glTranslatef(0.75, 2.25, 0)
+            self.desenhaContorno()
+            glPopMatrix()
+        elif self.option == 7:
+            glPushMatrix()
+            glScalef(1, -1, 1)
+            glColor3f(0, 0, 1)
+            glTranslatef(0.75, 2.25, 0)
+            self.desenhaContorno()
+            glPopMatrix()
+        elif self.option == 8:
+            glPushMatrix()
+            glScalef(1, -1, 1)
+            glColor3f(0, 0, 1)
+            glTranslatef(10.9, 2.25, 0)
+            self.desenhaContorno()
+            glPopMatrix()
+
+    def desenhaContorno(self):
+        cube = Cube()
+        glPushMatrix()
+        glScalef(8.7, 8.6, 1)
+        cube.desenha()
         glPopMatrix()
 
 class Game:
@@ -578,36 +651,36 @@ class Game:
 
             # escolhendo - escolhido
 
+        elif self.tela == "formação1" or self.tela == "formação2":
+            self.formation.desenha(self.tela)
+
         elif self.tela == "jogo":
 
-            if formation:
-                self.formation.desenha()
-            else:
-                glPushMatrix()
-                glTranslatef(-(self.campo.largura/2), -(self.campo.altura/2), 0)
-                self.campo.desenha()
-                self.campo.desenha_gol()
+            glPushMatrix()
+            glTranslatef(-(self.campo.largura/2), -(self.campo.altura/2), 0)
+            self.campo.desenha()
+            self.campo.desenha_gol()
 
-                glPushMatrix()
-                glTranslatef(self.campo.largura/2, self.campo.altura/2, 0)
-                
-                glPushMatrix()
-                glTranslatef(-self.bola.raio/2, -self.bola.raio/2, 0)
-                glTranslatef(self.bola.pos.x, self.bola.pos.y, self.bola.pos.z)
-                glScalef(self.bola.raio, self.bola.raio, 1)
-                self.bola.desenha()
-                glPopMatrix()
+            glPushMatrix()
+            glTranslatef(self.campo.largura/2, self.campo.altura/2, 0)
+            
+            glPushMatrix()
+            glTranslatef(-self.bola.raio/2, -self.bola.raio/2, 0)
+            glTranslatef(self.bola.pos.x, self.bola.pos.y, self.bola.pos.z)
+            glScalef(self.bola.raio, self.bola.raio, 1)
+            self.bola.desenha()
+            glPopMatrix()
 
-                self.timeA.desenha()
-                self.timeB.desenha()
+            self.timeA.desenha()
+            self.timeB.desenha()
 
-                glPopMatrix()
-                glPopMatrix()
+            glPopMatrix()
+            glPopMatrix()
 
-                if(progressbar):
-                    self.bola.desenha_progressbar()
+            if(progressbar):
+                self.bola.desenha_progressbar()
 
-                self.placar.desenha()
+            self.placar.desenha()
 
         glutSwapBuffers()
 
@@ -647,6 +720,8 @@ class Game:
                     velocidade.x = velocidade.y = velocidade.z = 0
                     angleProgressbar = 0.0
                     self.bola.pos = glm.vec3(0, 0, 0)
+                    self.timeA.alterarFormacao()
+                    self.timeB.alterarFormacao()
 
                     if self.vencedor(self.placar):
                         # self.desenha(winner) # desenha uma mensagem de vencedor
@@ -727,7 +802,6 @@ class Game:
             angleProgressbar = math.degrees(math.atan2(forca.y, forca.x))
 
     def tecladoASCII(self, key, x, y):
-        global formation
         if key == b'\r':
             if self.tela == "inicial":
                 if self.option == 0:
@@ -740,15 +814,28 @@ class Game:
             elif self.tela == "times":
                 if self.nomeA == "":
                     self.nomeA = OPTIONSTIMES[self.optionTimeA]
-                    self.timeA = Time(self.nomeA, FORMATION['1-2-2'], False)
+                    self.timeA = Time(self.nomeA, FORMATION['1'], False)
                 else:
                     self.nomeB = OPTIONSTIMES[self.optionTimeB]
-                    self.timeB = Time(self.nomeB, FORMATION['1-2-2'], True)
+                    self.timeB = Time(self.nomeB, FORMATION['1'], True)
                     self.placar = Placar(self.nomeA, self.nomeB)
                     self.tela = "jogo"
+            elif self.tela == "formação1":
+                self.timeA.formacao = FORMATION[str(self.formation.option)]
+                self.tela = "formação2"
+            elif self.tela == "formação2":
+                self.timeB.formacao = FORMATION[str(self.formation.option)]
+                self.tela = "jogo"
         elif key.lower() == b'f' and self.tela == "jogo":
-            formation = True
+            self.tela = "formação1"
             glutPostRedisplay()
+        elif key.lower() == b'q':
+            if self.tela == "formação1":
+                self.tela = "formação2"
+                glutPostRedisplay()
+            elif self.tela == "formação2":
+                self.tela = "jogo"
+                glutPostRedisplay()
 
     def tecladoEspecial(self, key, x, y):
         if self.tela == "inicial":
@@ -767,11 +854,22 @@ class Game:
                     self.optionTimeB += 1 if self.optionTimeB < (len(OPTIONSTIMES) - 1) else 0
                 elif key == GLUT_KEY_LEFT:
                     self.optionTimeB -= 1 if self.optionTimeB > 0 else 0
+        elif self.tela == "formação1" or self.tela == "formação2":
+            if key == GLUT_KEY_RIGHT:
+                self.formation.option += 1 if self.formation.option < 8 else 0
+            elif key == GLUT_KEY_LEFT:
+                self.formation.option -= 1 if self.formation.option > 1 else 0
+            elif key == GLUT_KEY_DOWN:
+                self.formation.option += 4 if self.formation.option < 5 else 0
+            elif key == GLUT_KEY_UP:
+                self.formation.option -= 4 if self.formation.option > 4 else 0
          
     def tecladoEspecialUp(self, key, x, y):
         if (key == GLUT_KEY_DOWN or key == GLUT_KEY_UP) and self.tela == "inicial":
             glutPostRedisplay()
         elif (key == GLUT_KEY_RIGHT or key == GLUT_KEY_LEFT) and self.tela == "times":
+            glutPostRedisplay()
+        elif (key == GLUT_KEY_RIGHT or key == GLUT_KEY_LEFT or key == GLUT_KEY_DOWN or key == GLUT_KEY_UP) and (self.tela == "formação1" or self.tela == "formação2"):
             glutPostRedisplay()
 
     def vencedor(self, placar):
