@@ -30,8 +30,6 @@ deslocamento = glm.vec3(0.0, 0.0, 0.0)
 velocidade = glm.vec3(0.0, 0.0, 0.0)
 winner = ""
 
-OPTIONS = [glm.vec3(-4.5, 3.3, 0), glm.vec3(-5.5, 0.6, 0), glm.vec3(-3.5, -2, 0)] # x = -4.5 ; -5.5 ; -3.5      y = 3.3 ; 0.6 ; -2
-
 TIME = {
     "belgica": 0,
     "brasil": 0,
@@ -39,15 +37,18 @@ TIME = {
     "italia": 0
 }
 
+OPTIONS = [glm.vec3(-4.5, 3.3, 0), glm.vec3(-5.5, 0.6, 0), glm.vec3(-3.5, -2, 0), glm.vec3(4.35, 0, 0)] # 0-2: Tela Inicial | 3: Tela Times
+OPTIONS.extend(TIME.keys()) # 4-?: Times
+
 FORMATION = {
     "1-2-2":   [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-campoLar/4, -5, 0), glm.vec3(-campoLar/4, 5, 0), glm.vec3(-3, -2, 0), glm.vec3(-3, 2, 0)],
     "1-2-1-1": [glm.vec3(-campoLar/2 + 3, 0, 0), glm.vec3(-campoLar/4 - 1, -4, 0), glm.vec3(-campoLar/4 - 1, 4, 0), glm.vec3(-3, 0, 0), glm.vec3(-7, 0, 0)]
 }
 
 TELAS = {"inicial": 0,
-         "times": 0,
-         "gol": 0,
-         "vencedor": 0
+         "times": 0#,
+        #  "gol": 0,
+        #  "vencedor": 0
 }
 
 SIGLAS = {}
@@ -108,19 +109,27 @@ class Cube:
     def __init__(self) -> None:
         pass
 
-    def desenha(self, fill=False):
+    def desenha(self, fill=False, invertido=False):
 
-        if (fill):
+        if fill:
             glPolygonMode( GL_FRONT_AND_BACK, GL_FILL )
         else:
             glPolygonMode( GL_FRONT_AND_BACK, GL_LINE )
 
-        glBegin(GL_QUADS)
-        glTexCoord2f(0, 0); glVertex2f(0, 0)
-        glTexCoord2f(0, 1); glVertex2f(0, 1)
-        glTexCoord2f(1, 1); glVertex2f(1, 1)
-        glTexCoord2f(1, 0); glVertex2f(1, 0)
-        glEnd()
+        if invertido:
+            glBegin(GL_QUADS)
+            glTexCoord2f(0, 0); glVertex2f(1, 0)
+            glTexCoord2f(0, 1); glVertex2f(1, 1)
+            glTexCoord2f(1, 1); glVertex2f(0, 1)
+            glTexCoord2f(1, 0); glVertex2f(0, 0)
+            glEnd()
+        else:
+            glBegin(GL_QUADS)
+            glTexCoord2f(0, 0); glVertex2f(0, 0)
+            glTexCoord2f(0, 1); glVertex2f(0, 1)
+            glTexCoord2f(1, 1); glVertex2f(1, 1)
+            glTexCoord2f(1, 0); glVertex2f(1, 0)
+            glEnd()
 
 class Triangle:
 
@@ -436,13 +445,14 @@ class Game:
         texGol = carregaTextura('Texturas/trave.png') 
 
         for i in TIME:
-            TIME[i] = carregaTextura(f'TIMES PNG/{i}.png')
-            SIGLAS[i] = carregaTextura(f'Siglas/{i}.png')
+            TIME[i] = carregaTextura(f'Texturas/TIMES PNG/{i}.png')
+            SIGLAS[i] = carregaTextura(f'Texturas/Siglas/{i}.png')
 
         for i in range(0, 6):
-            PLACAR[f'{i}'] = carregaTextura(f'Placar/{i}.png')
-
-        TELAS["inicial"] = carregaTextura(f'Telas/inicial.png')
+            PLACAR[f'{i}'] = carregaTextura(f'Texturas/Placar/{i}.png')
+        
+        for i in TELAS.keys():
+            TELAS[i] = carregaTextura(f'Texturas/Telas/{i}.png')        
 
         self.campo = Campo(campoLar, campoAlt)
         self.bola = Bola(bolaRaio)
@@ -479,6 +489,74 @@ class Game:
             triangule.desenha(True)
             glPopMatrix()
             
+        elif self.tela == "times":
+            cube = Cube()
+            triangule = Triangle()
+
+            glPushMatrix() # tela
+            glTranslatef(-mundoLar, -mundoAlt, 0)
+            glScalef(2 * mundoLar, 2 * mundoAlt, 1)
+            glBindTexture(GL_TEXTURE_2D, TELAS[self.tela])
+            cube.desenha(True)
+            glBindTexture(GL_TEXTURE_2D, 0)
+            glPopMatrix()
+
+            glPushMatrix() # Seleção
+            # if self.timeA != "":
+            #     glScalef(-1, 1, 1)
+
+            glTranslatef(-12.35, 0, 0)
+            
+            glPushMatrix()
+            glTranslatef(OPTIONS[self.option].x, OPTIONS[self.option].y, OPTIONS[self.option].z)
+            glRotatef(135, 0, 0, 1)
+            triangule.desenha(True)
+            glPopMatrix()
+            
+            glPushMatrix()
+            glScale(-1, 1, 1)
+            glTranslatef(OPTIONS[self.option].x, OPTIONS[self.option].y, OPTIONS[self.option].z)
+            glRotatef(135, 0, 0, 1)
+            triangule.desenha(True)
+            glPopMatrix()
+            glPopMatrix()
+
+            glPushMatrix() # time esquerdo
+            glTranslatef(-15.35, -3, 0)
+            glScalef(6, 6, 1)
+            glBindTexture(GL_TEXTURE_2D, TIME['brasil'])
+            cube.desenha(True)
+            glBindTexture(GL_TEXTURE_2D, 0)
+            glPopMatrix()
+            
+            glPushMatrix() # time direito
+            glScalef(-1, 1, 1)
+            glTranslatef(-15.35, -3, 0)
+            glScalef(6, 6, 1)
+            glBindTexture(GL_TEXTURE_2D, TIME['brasil'])
+            cube.desenha(True)
+            glBindTexture(GL_TEXTURE_2D, 0)
+            glPopMatrix()
+
+            glPushMatrix() # nome time esquerdo
+            glTranslatef(-13.95, 5.35, 0)
+            glScalef(3.2, 1.8, 1)
+            glBindTexture(GL_TEXTURE_2D, SIGLAS['brasil'])
+            cube.desenha(True)
+            glBindTexture(GL_TEXTURE_2D, 0)
+            glPopMatrix()
+            
+            glPushMatrix() # nome time direito
+            glScalef(-1, 1, 1)
+            glTranslatef(-13.95, 5.35, 0)
+            glScalef(3.2, 1.8, 1)
+            glBindTexture(GL_TEXTURE_2D, SIGLAS['brasil'])
+            cube.desenha(True, invertido=True)
+            glBindTexture(GL_TEXTURE_2D, 0)
+            glPopMatrix()
+
+            # escolhendo - escolhido
+
         elif self.tela == "jogo":
             
             glPushMatrix()
@@ -625,23 +703,24 @@ class Game:
             angleProgressbar = math.degrees(math.atan2(forca.y, forca.x))
 
     def tecladoASCII(self, key, x, y):
-        if key == b'\r':
+        if key == b'\r' and self.tela == "inicial":
             if self.option == 0:
-                self.tela = "jogo"
+                self.tela = "times"
+                self.option = 3
             elif self.option == 1:
                 print("options")
             elif self.option == 2:
                 glutLeaveMainLoop()
 
     def tecladoEspecial(self, key, x, y):
-        if key == GLUT_KEY_DOWN:
+        if key == GLUT_KEY_DOWN and self.tela == "inicial":
             self.option += 1 if self.option < 2 else 0
-        elif key == GLUT_KEY_UP:
+        elif key == GLUT_KEY_UP and self.tela == "inicial":
             self.option -= 1 if self.option > 0 else 0
         
     def tecladoEspecialUp(self, key, x, y):
-        if key == GLUT_KEY_DOWN or key == GLUT_KEY_UP:
-            glutPostRedisplay() 
+        if (key == GLUT_KEY_DOWN or key == GLUT_KEY_UP) and self.tela == "inicial":
+            glutPostRedisplay()
 
     def vencedor(self, placar):
         global winner
