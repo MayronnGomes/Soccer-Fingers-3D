@@ -309,11 +309,18 @@ class Bola:
     def move(self):
         global deslocamento
 
-        self.pos.x += velocidade.x
-        self.pos.y += velocidade.y
+        if (deslocamento.x > forca.x/2) and (deslocamento.y > forca.y/2):
+            self.pos.x += velocidade.x * 0.7
+            self.pos.y += velocidade.y * 0.7
 
-        deslocamento.x += velocidade.x # incrementando o deslocamento
-        deslocamento.y += velocidade.y # incrementando o deslocamento
+            deslocamento.x += velocidade.x * 0.7 # incrementando o deslocamento
+            deslocamento.y += velocidade.y * 0.7 # incrementando o deslocamento
+        else:
+            self.pos.x += velocidade.x
+            self.pos.y += velocidade.y
+
+            deslocamento.x += velocidade.x # incrementando o deslocamento
+            deslocamento.y += velocidade.y # incrementando o deslocamento
 
 class Placar:
 
@@ -779,7 +786,7 @@ class Game:
             if (abs(forca.x) > 0 or abs(forca.y) > 0 or abs(forca.z) > 0) and not mov:
                 mov = True
                 forca *= -1
-                velocidade = forca * 0.05
+                velocidade = forca * 0.03
     
     def motion(self, x, y):
         global forca, angleProgressbar
