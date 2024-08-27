@@ -30,15 +30,8 @@ class Bola:
 
     def move(self):
 
-        if (CONSTS.deslocamento.x > CONSTS.forca.x/2) and (CONSTS.deslocamento.y > CONSTS.forca.y/2):
-            self.pos.x += CONSTS.velocidade.x * 0.7
-            self.pos.y += CONSTS.velocidade.y * 0.7
+        self.pos.x += CONSTS.velocidade.x
+        self.pos.y += CONSTS.velocidade.y
 
-            CONSTS.deslocamento.x += CONSTS.velocidade.x * 0.7 # incrementando o deslocamento
-            CONSTS.deslocamento.y += CONSTS.velocidade.y * 0.7 # incrementando o deslocamento
-        else:
-            self.pos.x += CONSTS.velocidade.x
-            self.pos.y += CONSTS.velocidade.y
-
-            CONSTS.deslocamento.x += CONSTS.velocidade.x # incrementando o deslocamento
-            CONSTS.deslocamento.y += CONSTS.velocidade.y # incrementando o deslocamento
+        CONSTS.deslocamento.x += CONSTS.velocidade.x
+        CONSTS.deslocamento.y += CONSTS.velocidade.y
