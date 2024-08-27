@@ -260,7 +260,7 @@ class Game:
             if (abs(CONSTS.forca.x) > 0 or abs(CONSTS.forca.y) > 0 or abs(CONSTS.forca.z) > 0) and not CONSTS.mov:
                 CONSTS.mov = True
                 CONSTS.forca *= -1
-                CONSTS.velocidade = CONSTS.forca * 0.03
+                CONSTS.velocidade = glm.normalize(CONSTS.forca) * 0.2
     
     def motion(self, x, y):
 
