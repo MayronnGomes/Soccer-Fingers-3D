@@ -22,7 +22,7 @@ class Game:
         glutCreateWindow('FullScreen')
         self.inicio()
         glutTimerFunc(int(1000/CONSTS.FPS), self.timer, 0)      
-        glutFullScreen()
+        # glutFullScreen()
         glutKeyboardFunc(self.tecladoASCII)
         glutSpecialFunc(self.tecladoEspecial)
         glutSpecialUpFunc(self.tecladoEspecialUp)
@@ -35,6 +35,7 @@ class Game:
     def inicio(self):
         glClearColor(0, 0.3, 0, 1)
         glLineWidth(5)
+        glEnable(GL_DEPTH_TEST)
         glEnable(GL_MULTISAMPLE)                    
         glEnable(GL_TEXTURE_2D)                      
         glEnable(GL_BLEND);                         
@@ -68,102 +69,18 @@ class Game:
         self.tela = "inicial"
 
     def desenha(self):
-        glClear(GL_COLOR_BUFFER_BIT)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glOrtho(-CONSTS.mundoLar, CONSTS.mundoLar, -CONSTS.mundoAlt, CONSTS.mundoAlt, -1, 1)
+        
+        if self.tela == "jogo":
 
-        if self.tela == "inicial":
-            cube = Cube()
-            triangule = Triangle()
+            glFrustum(-1, 1, -1, 1, 2, 100)
 
-            glPushMatrix()
-            glTranslatef(-CONSTS.mundoLar, -CONSTS.mundoAlt, 0)
-            glScalef(2 * CONSTS.mundoLar, 2 * CONSTS.mundoAlt, 1)
-            glBindTexture(GL_TEXTURE_2D, CONSTS.TELAS[self.tela])
-            cube.desenha(True)
-            glBindTexture(GL_TEXTURE_2D, 0)
-            glPopMatrix()
-
-            glPushMatrix()
-            glTranslatef(CONSTS.OPTIONS[self.option].x, CONSTS.OPTIONS[self.option].y, CONSTS.OPTIONS[self.option].z)
-            glRotatef(135, 0, 0, 1)
-            triangule.desenha(True)
-            glPopMatrix()
-            
-        elif self.tela == "times":
-            cube = Cube()
-            triangule = Triangle()
-
-            glPushMatrix() # tela
-            glTranslatef(-CONSTS.mundoLar, -CONSTS.mundoAlt, 0)
-            glScalef(2 * CONSTS.mundoLar, 2 * CONSTS.mundoAlt, 1)
-            glBindTexture(GL_TEXTURE_2D, CONSTS.TELAS[self.tela])
-            cube.desenha(True)
-            glBindTexture(GL_TEXTURE_2D, 0)
-            glPopMatrix()
-
-            glPushMatrix() # Seleção
-            if self.nomeA != "":
-                glScalef(-1, 1, 1)
-
-            glTranslatef(-12.35, 0, 0)
-            
-            glPushMatrix()
-            glTranslatef(CONSTS.OPTIONS[self.option].x, CONSTS.OPTIONS[self.option].y, CONSTS.OPTIONS[self.option].z)
-            glRotatef(135, 0, 0, 1)
-            triangule.desenha(True)
-            glPopMatrix()
-            
-            glPushMatrix()
-            glScale(-1, 1, 1)
-            glTranslatef(CONSTS.OPTIONS[self.option].x, CONSTS.OPTIONS[self.option].y, CONSTS.OPTIONS[self.option].z)
-            glRotatef(135, 0, 0, 1)
-            triangule.desenha(True)
-            glPopMatrix()
-            glPopMatrix()
-
-            glPushMatrix() # time esquerdo
-            glTranslatef(-CONSTS.mundoLar * 0.72, -3, 0)
-            glScalef(6, 6, 1)
-            glBindTexture(GL_TEXTURE_2D, CONSTS.TIME[CONSTS.OPTIONSTIMES[self.optionTimeA]])
-            cube.desenha(True)
-            glBindTexture(GL_TEXTURE_2D, 0)
-            glPopMatrix()
-            
-            glPushMatrix() # time direito
-            glScalef(-1, 1, 1)
-            glTranslatef(-CONSTS.mundoLar * 0.72, -3, 0)
-            glScalef(6, 6, 1)
-            glBindTexture(GL_TEXTURE_2D, CONSTS.TIME[CONSTS.OPTIONSTIMES[self.optionTimeB]])
-            cube.desenha(True)
-            glBindTexture(GL_TEXTURE_2D, 0)
-            glPopMatrix()
-
-            glPushMatrix() # nome time esquerdo
-            glTranslatef(-CONSTS.mundoLar * 0.65, 5.35, 0)
-            glScalef(3.2, 1.8, 1)
-            glBindTexture(GL_TEXTURE_2D, CONSTS.SIGLAS[CONSTS.OPTIONSTIMES[self.optionTimeA]])
-            cube.desenha(True)
-            glBindTexture(GL_TEXTURE_2D, 0)
-            glPopMatrix()
-            
-            glPushMatrix() # nome time direito
-            glScalef(-1, 1, 1)
-            glTranslatef(-CONSTS.mundoLar * 0.65, 5.35, 0)
-            glScalef(3.2, 1.8, 1)
-            glBindTexture(GL_TEXTURE_2D, CONSTS.SIGLAS[CONSTS.OPTIONSTIMES[self.optionTimeB]])
-            cube.desenha(True, invertido=True)
-            glBindTexture(GL_TEXTURE_2D, 0)
-            glPopMatrix()
-
-            # escolhendo - escolhido
-
-        elif self.tela == "formação1" or self.tela == "formação2":
-            self.formation.desenha(self.tela)
-
-        elif self.tela == "jogo":
+            glMatrixMode(GL_MODELVIEW)
+            matrizCamera = glm.lookAt(glm.vec3(self.bola.pos.x + 7, self.bola.pos.y, self.bola.pos.z + 5), glm.vec3(-15, 0, 0), glm.vec3(0, 0, 1))
+            glLoadMatrixf(mat2list(matrizCamera))
 
             glPushMatrix()
             glTranslatef(-(self.campo.largura/2), -(self.campo.altura/2), 0)
@@ -190,6 +107,98 @@ class Game:
                 self.bola.desenha_progressbar()
 
             self.placar.desenha()
+
+        else:
+            glOrtho(-CONSTS.mundoLar, CONSTS.mundoLar, -CONSTS.mundoAlt, CONSTS.mundoAlt, -1, 1)
+
+            if self.tela == "inicial":
+                cube = Cube()
+                triangule = Triangle()
+
+                glPushMatrix()
+                glTranslatef(-CONSTS.mundoLar, -CONSTS.mundoAlt, 0)
+                glScalef(2 * CONSTS.mundoLar, 2 * CONSTS.mundoAlt, 1)
+                glBindTexture(GL_TEXTURE_2D, CONSTS.TELAS[self.tela])
+                cube.desenha(True)
+                glBindTexture(GL_TEXTURE_2D, 0)
+                glPopMatrix()
+
+                glPushMatrix()
+                glTranslatef(CONSTS.OPTIONS[self.option].x, CONSTS.OPTIONS[self.option].y, CONSTS.OPTIONS[self.option].z)
+                glRotatef(135, 0, 0, 1)
+                triangule.desenha(True)
+                glPopMatrix()
+                
+            elif self.tela == "times":
+                cube = Cube()
+                triangule = Triangle()
+
+                glPushMatrix() # tela
+                glTranslatef(-CONSTS.mundoLar, -CONSTS.mundoAlt, 0)
+                glScalef(2 * CONSTS.mundoLar, 2 * CONSTS.mundoAlt, 1)
+                glBindTexture(GL_TEXTURE_2D, CONSTS.TELAS[self.tela])
+                cube.desenha(True)
+                glBindTexture(GL_TEXTURE_2D, 0)
+                glPopMatrix()
+
+                glPushMatrix() # Seleção
+                if self.nomeA != "":
+                    glScalef(-1, 1, 1)
+
+                glTranslatef(-12.35, 0, 0)
+                
+                glPushMatrix()
+                glTranslatef(CONSTS.OPTIONS[self.option].x, CONSTS.OPTIONS[self.option].y, CONSTS.OPTIONS[self.option].z)
+                glRotatef(135, 0, 0, 1)
+                triangule.desenha(True)
+                glPopMatrix()
+                
+                glPushMatrix()
+                glScale(-1, 1, 1)
+                glTranslatef(CONSTS.OPTIONS[self.option].x, CONSTS.OPTIONS[self.option].y, CONSTS.OPTIONS[self.option].z)
+                glRotatef(135, 0, 0, 1)
+                triangule.desenha(True)
+                glPopMatrix()
+                glPopMatrix()
+
+                glPushMatrix() # time esquerdo
+                glTranslatef(-CONSTS.mundoLar * 0.72, -3, 0)
+                glScalef(6, 6, 1)
+                glBindTexture(GL_TEXTURE_2D, CONSTS.TIME[CONSTS.OPTIONSTIMES[self.optionTimeA]])
+                cube.desenha(True)
+                glBindTexture(GL_TEXTURE_2D, 0)
+                glPopMatrix()
+                
+                glPushMatrix() # time direito
+                glScalef(-1, 1, 1)
+                glTranslatef(-CONSTS.mundoLar * 0.72, -3, 0)
+                glScalef(6, 6, 1)
+                glBindTexture(GL_TEXTURE_2D, CONSTS.TIME[CONSTS.OPTIONSTIMES[self.optionTimeB]])
+                cube.desenha(True)
+                glBindTexture(GL_TEXTURE_2D, 0)
+                glPopMatrix()
+
+                glPushMatrix() # nome time esquerdo
+                glTranslatef(-CONSTS.mundoLar * 0.65, 5.35, 0)
+                glScalef(3.2, 1.8, 1)
+                glBindTexture(GL_TEXTURE_2D, CONSTS.SIGLAS[CONSTS.OPTIONSTIMES[self.optionTimeA]])
+                cube.desenha(True)
+                glBindTexture(GL_TEXTURE_2D, 0)
+                glPopMatrix()
+                
+                glPushMatrix() # nome time direito
+                glScalef(-1, 1, 1)
+                glTranslatef(-CONSTS.mundoLar * 0.65, 5.35, 0)
+                glScalef(3.2, 1.8, 1)
+                glBindTexture(GL_TEXTURE_2D, CONSTS.SIGLAS[CONSTS.OPTIONSTIMES[self.optionTimeB]])
+                cube.desenha(True, invertido=True)
+                glBindTexture(GL_TEXTURE_2D, 0)
+                glPopMatrix()
+
+                # escolhendo - escolhido
+
+            elif self.tela == "formação1" or self.tela == "formação2":
+                self.formation.desenha(self.tela)
 
         glutSwapBuffers()
 

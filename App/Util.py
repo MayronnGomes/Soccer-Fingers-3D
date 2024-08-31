@@ -30,3 +30,9 @@ def carregaTextura(filename):
 
     #retornando o identificador da textura recém-criada
     return texId
+
+def mat2list(M):
+    matrix = []
+    for i in range(0,4):
+        matrix.append(list(M[i]))
+    return matrix
