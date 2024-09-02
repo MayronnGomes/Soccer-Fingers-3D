@@ -1,15 +1,24 @@
 import CONSTS
 import glm
 from Cube import *
+from Cilindro import *
 
 class Jogador:
 
-    def __init__(self, raio, time, posicao):
+    def __init__(self, altura, raio, time, posicao):
+        self.altura = altura
         self.raio = raio
         self.time = time
         self.posicao = posicao
 
     def desenha(self):
+        jogador = Cilindro(self.altura, self.raio, self.time)
+        glPushMatrix()
+        glTranslatef(self.posicao.x, self.posicao.y, self.posicao.z)
+        jogador.desenha()
+        glPopMatrix()
+
+    def desenha2d(self):
         jogador = Cube()
         glBindTexture(GL_TEXTURE_2D, self.time)
         glPushMatrix()

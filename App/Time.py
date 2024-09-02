@@ -4,10 +4,10 @@ from Jogador import *
 class Time:
 
     def __init__(self, escudo, formacao, visitante):
-        self.escudo = CONSTS.TIME[escudo]
+        self.escudo = escudo
         self.formacao = formacao
         self.visitante = visitante
-        self.jogadores = [Jogador(2, self.escudo, (self.formacao[i]*(-1) if self.visitante else self.formacao[i])) for i in range(5)]
+        self.jogadores = [Jogador(1, 1, self.escudo, (self.formacao[i]*(-1) if self.visitante else self.formacao[i])) for i in range(5)]
 
     def desenha(self):
         for i in self.jogadores:

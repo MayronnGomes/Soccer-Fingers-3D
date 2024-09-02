@@ -4,18 +4,16 @@ from OpenGL.GL import *
 
 class Cilindro:
 
-    def __init__(self, altura, raio, nomeTextura):
+    def __init__(self, altura, raio, textura):
         self.altura = altura
         self.raio = raio
-        self.textura = nomeTextura
+        self.textura = textura
+        self.camisa = CONSTS.CAMISAS_TIME[self.textura]
 
     def desenha(self):
-
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL )
 
-        glBindTexture(GL_TEXTURE_2D, CONSTS.TIME[self.textura])
-
-        glColor3f(1, 1, 1)
+        glColor3f(self.camisa.x, self.camisa.y, self.camisa.z)
         
         # Divisões ao longo da altura e circunferência
         altura_div = self.altura / CONSTS.divisaoCilindro
@@ -60,18 +58,12 @@ class Cilindro:
         
         glEnd()
 
-        glBindTexture(GL_TEXTURE_2D, 0)
-
         # Desenhar a tampa superior
         glBindTexture(GL_TEXTURE_2D, CONSTS.TIME[self.textura])
-
         self.desenha_tampa(self.raio, self.altura, CONSTS.divisaoCilindro)
-
-        # Desenhar a tampa inferior
-        self.desenha_tampa(self.raio, 0, CONSTS.divisaoCilindro)
         glBindTexture(GL_TEXTURE_2D, 0)
 
-    def desenhaTampa(self, raio, z, divisao):
+    def desenha_tampa(self, raio, z, divisao):
         """Função para desenhar a tampa (topo ou base) do cilindro"""
         angulo_div = (360 / divisao)  # Divisões angulares em graus
 
