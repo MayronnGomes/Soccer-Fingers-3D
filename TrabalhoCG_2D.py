@@ -15,6 +15,33 @@ janelaLargura = 500                                                         # la
 janelaAltura = 500                                                          # altura da janela em pixels
 aspectRatio = 1                                                             # aspect ratio da janela (largura dividida pela altura)
 
+def load_obj(filename):
+    vertices = []
+    normals = []
+    faces = []
+
+    with open(filename, 'r') as file:
+        for line in file:
+            if line.startswith('v '):  # Linha de vértice
+                parts = line.split()
+                vertex = list(map(float, parts[1:4]))
+                vertices.append(vertex)
+            elif line.startswith('vn '):  # Linha de normal
+                parts = line.split()
+                normal = list(map(float, parts[1:4]))
+                normals.append(normal)
+            elif line.startswith('f '):  # Linha de face
+                parts = line.split()
+                face = []
+                for part in parts[1:]:
+                    vals = part.split('//')
+                    vertex_index = int(vals[0]) - 1  # Convertendo para índice 0-based
+                    normal_index = int(vals[1]) - 1 if len(vals) > 1 else None
+                    face.append((vertex_index, normal_index))
+                faces.append(face)
+
+    return vertices, normals, faces
+
 def draw_grid(l, a, divisoes):
     glColor3f(1, 1, 1)  # Branco (não necessário se estiver mapeando texturas)
 
@@ -237,8 +264,7 @@ def inicio():
     glEnable(GL_BLEND);                                 # habilitando a funcionalidade de mistura (necessário para objetos transparentes)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glEnable(GL_MULTISAMPLE) # habilita um tipo de antialiasing (melhora serrilhado de linhas e bordas de polÃ­gonos)
-    tex1 = carregaTextura('earth.jpg')
-    tex2 = carregaTextura('brasil.png')
+    tex1 = carregaTextura('../Texturas/earth.jpg')
 
 #FunÃ§Ã£o que converte glm.mat4 em list<float>
 def mat2list(M):
@@ -313,8 +339,10 @@ def desenha():
     glLoadMatrixf(mat2list(matrizCamera))                               # aplicando matriz de cÃ¢mera no OpenGL
 
     # glPolygonMode( GL_FRONT_AND_BACK, GL_LINE )
-    draw_cylinder(3, 5, 60, tex1, tex2)
-    # draw_sphere(3, 60)
+    # draw_cylinder(3, 5, 60, tex1, tex2)
+    glBindTexture(GL_TEXTURE_2D, tex1)
+    draw_sphere(3, 60)
+    glBindTexture(GL_TEXTURE_2D, 0)
     
 
     glutSwapBuffers() 
