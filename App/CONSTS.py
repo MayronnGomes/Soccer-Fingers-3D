@@ -45,6 +45,13 @@ TIME = {
     "italia": 0
 }
 
+CAMISAS_TIME = {
+    "belgica": glm.vec3(1, 0, 0),
+    "brasil": glm.vec3(1, 204/255, 0),
+    "inglaterra": glm.vec3(1, 1, 1),
+    "italia": glm.vec3(0, 130/255, 99/255)
+}
+
 OPTIONS = [glm.vec3(-4.5, 3.3, 0), glm.vec3(-5.5, 0.6, 0), glm.vec3(-3.5, -2, 0), glm.vec3(mundoLar * 0.45, 0, 0)] # 0-2: Tela Inicial | 3: Tela Times
 
 OPTIONSTIMES = [i for i in TIME.keys()]

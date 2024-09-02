@@ -62,11 +62,11 @@ class Placar:
         glPopMatrix()
         
         glPushMatrix() # times
-        jogador1 = Jogador(1.5, CONSTS.TIME[self.time1], glm.vec3(-11, 10.52, 0))
-        jogador2 = Jogador(1.5, CONSTS.TIME[self.time2], glm.vec3(11, 10.52, 0))
+        jogador1 = Jogador(1, 1.5, CONSTS.TIME[self.time1], glm.vec3(-11, 10.52, 0))
+        jogador2 = Jogador(1, 1.5, CONSTS.TIME[self.time2], glm.vec3(11, 10.52, 0))
 
-        jogador1.desenha()
-        jogador2.desenha()
+        jogador1.desenha2d()
+        jogador2.desenha2d()
         glPopMatrix()
 
         glPushMatrix() #desenha o nome esq
