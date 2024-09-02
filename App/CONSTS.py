@@ -9,6 +9,7 @@ from OpenGL.GLU import *
 from PIL import Image
 
 FPS = 30
+divisaoCilindro = 60
 campoLar = 30
 campoAlt = 15
 bolaRaio = 1

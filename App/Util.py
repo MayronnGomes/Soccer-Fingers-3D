@@ -1,4 +1,5 @@
 import glm
+import math
 import CONSTS
 from PIL import Image
 from OpenGL.GL import *
@@ -36,3 +37,10 @@ def mat2list(M):
     for i in range(0,4):
         matrix.append(list(M[i]))
     return matrix
+
+def computeCylinderCoord(h, a, radius):
+    a_rad = (math.pi / 180) * a
+    x = radius * math.cos(a_rad)
+    y = radius * math.sin(a_rad)
+    z = h
+    return glm.vec3(x, y, z)
