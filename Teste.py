@@ -1,13 +1,12 @@
 from OpenGL.GL import *
 from OpenGL.GLUT import *
-import glm 
-from PIL import Image
-import math
+import glm
 
 def load_obj(filename):
     vertices = []
-    normals = []
     faces = []
+    face_materials = []
+    current_material = None
 
     with open(filename, 'r') as file:
         for line in file:
@@ -15,34 +14,39 @@ def load_obj(filename):
                 parts = line.split()
                 vertex = list(map(float, parts[1:4]))
                 vertices.append(vertex)
-            elif line.startswith('vn '):  # Linha de normal
-                parts = line.split()
-                normal = list(map(float, parts[1:4]))
-                normals.append(normal)
+            elif line.startswith('usemtl'):  # Linha de material
+                current_material = line.split()[1]
             elif line.startswith('f '):  # Linha de face
                 parts = line.split()
                 face = []
                 for part in parts[1:]:
-                    vals = part.split('//')
-                    vertex_index = int(vals[0]) - 1  # Convertendo para índice 0-based
-                    normal_index = int(vals[1]) - 1 if len(vals) > 1 else None
-                    face.append((vertex_index, normal_index))
+                    vertex_index = int(part.split('//')[0]) - 1
+                    face.append(vertex_index)
                 faces.append(face)
+                face_materials.append(current_material)
 
-    return vertices, normals, faces
+    return vertices, faces, face_materials
 
-def draw_obj(vertices, normals, faces):
-    for face in faces:
+def draw_obj(vertices, faces, face_materials):
+    # Definir cores com base no material
+    color_map = {
+        'Bianco': (1.0, 1.0, 1.0),  # Branco
+        'Nero.001': (0.0, 0.0, 0.0)    # Preto
+    }
+
+    for i, face in enumerate(faces):
         if len(face) == 3:
             glBegin(GL_TRIANGLES)
         else:
             glBegin(GL_POLYGON)
-        
-        for vertex, normal in face:
-            if normal is not None:
-                glNormal3fv(normals[normal])
+
+        material_name = face_materials[i]
+        color = color_map.get(material_name, (1.0, 1.0, 1.0))  # Default to white if material not found
+        glColor3fv(color)
+
+        for vertex in face:
             glVertex3fv(vertices[vertex])
-        
+
         glEnd()
 
 def display():
@@ -56,16 +60,14 @@ def display():
     glRotatef(25, 1, 0, 0)
     glRotatef(25, 0, 1, 0)
 
-    draw_obj(vertices, normals, faces)
+    draw_obj(vertices, faces, face_materials)
 
     glutSwapBuffers()
 
 def init_gl():
+    glDisable(GL_LIGHTING)  # Desabilita iluminação
+    glDisable(GL_COLOR_MATERIAL)  # Desabilita materiais
     glEnable(GL_DEPTH_TEST)
-    glEnable(GL_LIGHTING)
-    glEnable(GL_LIGHT0)
-    glEnable(GL_COLOR_MATERIAL)
-    glShadeModel(GL_SMOOTH)
     glClearColor(0.1, 0.1, 0.1, 1.0)
     glClearDepth(1.0)
     glDepthFunc(GL_LEQUAL)
@@ -73,7 +75,7 @@ def init_gl():
 if __name__ == "__main__":
     # Carregando o arquivo OBJ
     filename = "Ball.obj"
-    vertices, normals, faces = load_obj(filename)
+    vertices, faces, face_materials = load_obj(filename)
 
     # Inicializando a janela OpenGL
     glutInit()
