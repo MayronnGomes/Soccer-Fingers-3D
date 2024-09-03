@@ -74,7 +74,7 @@ def init_gl():
 
 if __name__ == "__main__":
     # Carregando o arquivo OBJ
-    filename = "Ball.obj"
+    filename = "./Texturas/Ball.obj"
     vertices, faces, face_materials = load_obj(filename)
 
     # Inicializando a janela OpenGL
