@@ -75,6 +75,7 @@ class Game:
         glLoadIdentity()
         
         if self.tela == "jogo":
+            # glOrtho(-CONSTS.mundoLar, CONSTS.mundoLar, -CONSTS.mundoAlt, CONSTS.mundoAlt, -1, 1)
 
             glFrustum(-1, 1, -1, 1, 2, 100)
 
@@ -110,10 +111,11 @@ class Game:
             glPopMatrix()
             glPopMatrix()
 
-            if(CONSTS.progressbar):
-                self.bola.desenha_progressbar()
-
+            glPushMatrix()
             self.placar.desenha()
+            glScalef(-1, -1, 1)
+            self.placar.desenha()
+            glPopMatrix()
 
         else:
             glOrtho(-CONSTS.mundoLar, CONSTS.mundoLar, -CONSTS.mundoAlt, CONSTS.mundoAlt, -1, 1)
