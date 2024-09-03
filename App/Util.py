@@ -44,3 +44,28 @@ def computeCylinderCoord(h, a, radius):
     y = radius * math.sin(a_rad)
     z = h
     return glm.vec3(x, y, z)
+
+def load_obj(filename):
+    vertices = []
+    faces = []
+    face_materials = []
+    current_material = None
+
+    with open(filename, 'r') as file:
+        for line in file:
+            if line.startswith('v '):  # Linha de vértice
+                parts = line.split()
+                vertex = list(map(float, parts[1:4]))
+                vertices.append(vertex)
+            elif line.startswith('usemtl'):  # Linha de material
+                current_material = line.split()[1]
+            elif line.startswith('f '):  # Linha de face
+                parts = line.split()
+                face = []
+                for part in parts[1:]:
+                    vertex_index = int(part.split('//')[0]) - 1
+                    face.append(vertex_index)
+                faces.append(face)
+                face_materials.append(current_material)
+
+    return vertices, faces, face_materials

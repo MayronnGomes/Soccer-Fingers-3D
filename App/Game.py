@@ -16,7 +16,7 @@ class Game:
     def __init__(self):
 
         glutInit()
-        glutInitDisplayMode(GLUT_MULTISAMPLE | GLUT_DOUBLE | GLUT_RGB)
+        glutInitDisplayMode(GLUT_MULTISAMPLE | GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH)
         glutInitWindowSize(CONSTS.janelaLar, CONSTS.janelaAlt)
         glutInitWindowPosition(0,0)
         glutCreateWindow('FullScreen')
@@ -34,11 +34,13 @@ class Game:
 
     def inicio(self):
         glClearColor(0, 0.3, 0, 1)
+        glClearDepth(1.0)
         glLineWidth(5)
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_MULTISAMPLE)                    
         glEnable(GL_TEXTURE_2D)                      
-        glEnable(GL_BLEND);                         
+        glEnable(GL_BLEND);       
+        glDepthFunc(GL_LEQUAL)                  
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         CONSTS.texCampo = carregaTextura('../Texturas/campo.jpg')
         CONSTS.texBola = carregaTextura('../Texturas/bola.png')
@@ -76,6 +78,8 @@ class Game:
         
         if self.tela == "jogo":
 
+            # glOrtho(-CONSTS.mundoLar, CONSTS.mundoLar, -CONSTS.mundoAlt, CONSTS.mundoAlt, -1, 1)
+
             glFrustum(-1, 1, -1, 1, 2, 100)
 
             glMatrixMode(GL_MODELVIEW)
@@ -91,9 +95,8 @@ class Game:
             glTranslatef(self.campo.largura/2, self.campo.altura/2, 0)
             
             glPushMatrix()
-            glTranslatef(-self.bola.raio/2, -self.bola.raio/2, 0)
-            glTranslatef(self.bola.pos.x, self.bola.pos.y, self.bola.pos.z)
-            glScalef(self.bola.raio, self.bola.raio, 1)
+            glTranslatef(0, 0, self.bola.raio/2)
+            glScalef(self.bola.raio/2, self.bola.raio/2, self.bola.raio/2)
             self.bola.desenha()
             glPopMatrix()
 
