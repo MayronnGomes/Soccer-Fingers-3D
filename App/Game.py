@@ -43,9 +43,7 @@ class Game:
         glDepthFunc(GL_LEQUAL)                  
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         CONSTS.texCampo = carregaTextura('../Texturas/campo.jpg')
-        CONSTS.texBola = carregaTextura('../Texturas/bola.png')
         CONSTS.texProgBar = carregaTextura('../Texturas/arrow.png')
-        CONSTS.texGol = carregaTextura('../Texturas/trave.png') 
 
         for i in CONSTS.TIME:
             CONSTS.TIME[i] = carregaTextura(f'../Texturas/TIMES PNG/{i}.png')
@@ -78,8 +76,6 @@ class Game:
         
         if self.tela == "jogo":
 
-            # glOrtho(-CONSTS.mundoLar, CONSTS.mundoLar, -CONSTS.mundoAlt, CONSTS.mundoAlt, -1, 1)
-
             glFrustum(-1, 1, -1, 1, 2, 100)
 
             glMatrixMode(GL_MODELVIEW)
@@ -89,7 +85,15 @@ class Game:
             glPushMatrix()
             glTranslatef(-(self.campo.largura/2), -(self.campo.altura/2), 0)
             self.campo.desenha()
+            # gol esquerdo
             self.campo.desenha_gol()
+
+            # gol direito
+            glPushMatrix()
+            glTranslatef(CONSTS.campoLar, 0, 0)
+            glScalef(-1, 1, 1)
+            self.campo.desenha_gol()
+            glPopMatrix()
 
             glPushMatrix()
             glTranslatef(self.campo.largura/2, self.campo.altura/2, 0)

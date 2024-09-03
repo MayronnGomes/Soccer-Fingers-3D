@@ -8,15 +8,17 @@ import math
 tex1 = 0
 tex2 = 0
 FPS = 30
-camPos = glm.vec4(8,8,8,1);                                                 # posiÃ§Ã£o inicial da cÃ¢mera
-camRotacao = glm.rotate(glm.mat4(1.0), glm.radians(1.0), glm.vec3(0,1,0))   # matriz de rotaÃ§Ã£o para girar a cÃ¢mera
+camPos = glm.vec4(1.5,1.5,1.5,1);                                                 # posiÃ§Ã£o inicial da cÃ¢mera
+camRotacao = glm.rotate(glm.mat4(1.0), glm.radians(1.0), glm.vec3(0,0,1))   # matriz de rotaÃ§Ã£o para girar a cÃ¢mera
 gira = True                                                                 # variÃ¡vel que determina se a cÃ¢mera estÃ¡ ou nÃ£o girando
 janelaLargura = 500                                                         # largura da janela em pixels
 janelaAltura = 500                                                          # altura da janela em pixels
 aspectRatio = 1                                                             # aspect ratio da janela (largura dividida pela altura)
 
+
 def load_obj(filename):
     vertices = []
+    textures = []
     normals = []
     faces = []
 
@@ -26,6 +28,10 @@ def load_obj(filename):
                 parts = line.split()
                 vertex = list(map(float, parts[1:4]))
                 vertices.append(vertex)
+            elif line.startswith('vt '):  # Linha de textura
+                parts = line.split()
+                texture = list(map(float, parts[1:3]))
+                textures.append(texture)
             elif line.startswith('vn '):  # Linha de normal
                 parts = line.split()
                 normal = list(map(float, parts[1:4]))
@@ -34,13 +40,32 @@ def load_obj(filename):
                 parts = line.split()
                 face = []
                 for part in parts[1:]:
-                    vals = part.split('//')
-                    vertex_index = int(vals[0]) - 1  # Convertendo para índice 0-based
-                    normal_index = int(vals[1]) - 1 if len(vals) > 1 else None
-                    face.append((vertex_index, normal_index))
+                    vals = part.split('/')
+                    vertex_index = int(vals[0]) - 1
+                    texture_index = int(vals[1]) - 1 if len(vals) > 1 and vals[1] else None
+                    normal_index = int(vals[2]) - 1 if len(vals) > 2 and vals[2] else None
+                    face.append((vertex_index, texture_index, normal_index))
                 faces.append(face)
 
-    return vertices, normals, faces
+    return vertices, textures, normals, faces
+
+def draw_obj(vertices, textures, normals, faces):
+    for face in faces:
+        if len(face) == 3:
+            glBegin(GL_TRIANGLES)
+        else:
+            glBegin(GL_POLYGON)
+        
+        for vertex, texture, normal in face:
+            if texture is not None:
+                glTexCoord2fv(textures[texture])
+            if normal is not None:
+                glNormal3fv(normals[normal])
+            glVertex3fv(vertices[vertex])
+        
+        glEnd()
+
+
 
 def draw_grid(l, a, divisoes):
     glColor3f(1, 1, 1)  # Branco (não necessário se estiver mapeando texturas)
@@ -254,17 +279,20 @@ def draw_cylinder_cap(radius, z, divisoes):
     
     glEnd()
 
+
 #FunÃ§Ã£o contendo configuraÃ§Ãµes iniciais
 def inicio():
     global tex1, tex2
     glClearColor(0.5,0.5,0.5,1)
+    glClearDepth(1.0)
     glLineWidth(1)           # altera a largura das linhas para 1 pixel
     glEnable(GL_DEPTH_TEST)  # habilitando a remoÃ§Ã£o de faces que estejam atrÃ¡s de outras (remoÃ§Ã£o de faces traseiras)
     glEnable(GL_TEXTURE_2D)                             # habilitando o uso de texturas
     glEnable(GL_BLEND);                                 # habilitando a funcionalidade de mistura (necessário para objetos transparentes)
+    glDepthFunc(GL_LEQUAL)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glEnable(GL_MULTISAMPLE) # habilita um tipo de antialiasing (melhora serrilhado de linhas e bordas de polÃ­gonos)
-    tex1 = carregaTextura('../Texturas/earth.jpg')
+    # tex1 = carregaTextura('../Texturas/earth.jpg')
 
 #FunÃ§Ã£o que converte glm.mat4 em list<float>
 def mat2list(M):
@@ -332,7 +360,7 @@ def desenha():
 
     glMatrixMode(GL_PROJECTION)  # habilitando definiÃ§Ã£o da projeÃ§Ã£o
     glLoadIdentity()             # carregando matriz identidade
-    glFrustum(-1,1,-1,1,2,100)   # criando frustum de visualizaÃ§Ã£o (projeÃ§Ã£o em perspectiva)
+    glFrustum(-1,1,-1,1,2,30)   # criando frustum de visualizaÃ§Ã£o (projeÃ§Ã£o em perspectiva)
 
     glMatrixMode(GL_MODELVIEW)                                          # habilitando definiÃ§Ã£o da cÃ¢mera e das matrizes de transformaÃ§Ã£o geomÃ©trica
     matrizCamera = glm.lookAt(camPos.xyz, glm.vec3(0), glm.vec3(0,0,1)) # criando matriz de cÃ¢mera com GLM e funÃ§Ã£o look-at(pos, at, up)
@@ -340,16 +368,25 @@ def desenha():
 
     # glPolygonMode( GL_FRONT_AND_BACK, GL_LINE )
     # draw_cylinder(3, 5, 60, tex1, tex2)
-    glBindTexture(GL_TEXTURE_2D, tex1)
-    draw_sphere(3, 60)
-    glBindTexture(GL_TEXTURE_2D, 0)
+    # glBindTexture(GL_TEXTURE_2D, tex1)
+    # draw_sphere(3, 60)
+    # glBindTexture(GL_TEXTURE_2D, 0)
+
+    glScalef(0.1, 0.1, 0.1)
+    draw_obj(vertices, textures, normals, faces)
+
+    glutSwapBuffers()
     
 
     glutSwapBuffers() 
 
+
 #Corpo principal do cÃ³digo
+filename = "goal.obj"
+vertices, textures, normals, faces = load_obj(filename)
+
 glutInit()
-glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA) #utilizando Double Buffering atravÃ©s da opÃ§Ã£o GLUT_DOUBLE
+glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH) #utilizando Double Buffering atravÃ©s da opÃ§Ã£o GLUT_DOUBLE
 glutInitWindowSize(int(janelaLargura),int(janelaAltura))
 glutInitWindowPosition(0,0)
 glutCreateWindow("Visualizacao 3D - Camera e Projecao em Perspectiva")

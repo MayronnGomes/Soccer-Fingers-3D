@@ -1,6 +1,7 @@
 import glm
 import CONSTS
 from Cube import *
+from Util import *
 
 class Campo:
     
@@ -19,17 +20,28 @@ class Campo:
         glPopMatrix()
 
     def desenha_gol(self):
-        gol = Cube()
-
+        filename = "../Texturas/goal.obj"
+        vertices, textures, normals, faces = load_obj_gol(filename)
+        
         glPushMatrix()
-        glTranslatef(-2, self.altura/2 - 2.7, 0)
-        glScalef(2, 6, 1)
-        glBindTexture(GL_TEXTURE_2D, CONSTS.texGol)
-        gol.desenha(True)
-        glTranslatef(17, 0, 0)
-        glScalef(-1, 1, 1)
-        gol.desenha(True)
-        glBindTexture(GL_TEXTURE_2D, 0)
+        glTranslatef(-1, self.altura/2, 1.5)
+        glScalef(1, 1.2, 1.5)
+    
+        for face in faces:
+            if len(face) == 3:
+                glBegin(GL_TRIANGLES)
+            else:
+                glBegin(GL_POLYGON)
+            
+            for vertex, texture, normal in face:
+                if texture is not None:
+                    glTexCoord2fv(textures[texture])
+                if normal is not None:
+                    glNormal3fv(normals[normal])
+                glVertex3fv(vertices[vertex])
+            
+            glEnd()
+
         glPopMatrix()
 
     def verifica_colisao(self, bola):
