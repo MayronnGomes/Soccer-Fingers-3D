@@ -1,6 +1,6 @@
 import glm
 import CONSTS
-from Cube import *
+from Util import *
 
 class Bola:
 
@@ -9,23 +9,31 @@ class Bola:
         self.pos = glm.vec3(0, 0, 0)
 
     def desenha(self):
-        bola = Cube()
-        
-        glBindTexture(GL_TEXTURE_2D, CONSTS.texBola)
-        bola.desenha(True)
-        glBindTexture(GL_TEXTURE_2D, 0)
-
-    def desenha_progressbar(self):
-        bar = Cube()
+        vertices, faces, face_materials = load_obj('../Texturas/Ball.obj')
+        # Definir cores com base no material
+        color_map = {
+            'Bianco': (1.0, 1.0, 1.0),  # Branco
+            'Nero.001': (0.0, 0.0, 0.0)    # Preto
+        }
 
         glPushMatrix()
-        glTranslatef(self.pos.x, self.pos.y, self.pos.z)
-        glRotatef(CONSTS.angleProgressbar + 90, 0, 0, 1)
-        glTranslatef(-1/4, -3/2, 0)
-        glScalef(1/2, 3, 1)
-        glBindTexture(GL_TEXTURE_2D, CONSTS.texProgBar)
-        bar.desenha(True)
-        glBindTexture(GL_TEXTURE_2D, 0)
+        # glTranslatef(0, 0, CONSTS.bolaRaio)
+
+        for i, face in enumerate(faces):
+            if len(face) == 3:
+                glBegin(GL_TRIANGLES)
+            else:
+                glBegin(GL_POLYGON)
+
+            material_name = face_materials[i]
+            color = color_map.get(material_name, (1.0, 1.0, 1.0))  # Default to white if material not found
+            glColor3fv(color)
+
+            for vertex in face:
+                glVertex3fv(vertices[vertex])
+
+            glEnd()
+        
         glPopMatrix()
 
     def move(self):
