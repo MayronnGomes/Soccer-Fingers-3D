@@ -9,6 +9,11 @@ class Cilindro:
         self.raio = raio
         self.textura = textura
         self.camisa = CONSTS.CAMISAS_TIME[self.textura]
+        self.lightDiffuse = glm.vec3(1.0)      # Id               
+        self.surfaceDiffuse = glm.vec3(1,1,1)  # Kd       
+        self.lightSpecular = glm.vec3(1.0)     # Is
+        self.surfaceSpecular = glm.vec3(0.5)   # Ks               
+        self.surfaceShine = 128                # e
 
     def desenha(self):
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL )

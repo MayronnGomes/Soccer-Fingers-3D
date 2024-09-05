@@ -7,15 +7,11 @@ class Bola:
     def __init__(self, raio):
         self.raio = raio
         self.pos = glm.vec3(0, 0, 0)
-        self.lightPosition = glm.vec3(0, 0, 30)
-        self.lightAmbient = glm.vec3(0.1)    
-        self.lightDiffuse = glm.vec3(1.0)                    
-        self.lightSpecular = glm.vec3(1.0)  
-        self.surfaceAmbient = glm.vec3(0.1)         
-        self.surfaceDiffuse = glm.vec3(1,1,1)              
-        self.surfaceSpecular = glm.vec3(0.5)                      
-        self.surfaceShine = 128
-
+        self.lightDiffuse = glm.vec3(1.0)      # Id               
+        self.surfaceDiffuse = glm.vec3(1.0)    # Kd       
+        self.lightSpecular = glm.vec3(1.0)     # Is
+        self.surfaceSpecular = glm.vec3(0.5)   # Ks               
+        self.surfaceShine = 250                # e
 
     def desenha(self):
         vertices, faces, normals, face_materials = load_obj('../Texturas/Ball.obj')
