@@ -110,20 +110,20 @@ def load_obj_gol(filename):
 
 # Calcula a cor de sombreamento de um ponto usando o Modelo de IluminaÃ§Ã£o de Phong
 def shading(point, normal, objeto):
-    # reflexÃ£o ambiente
-    shadeAmbient = objeto.lightAmbient * objeto.surfaceAmbient
+    # reflexão ambiente (Ra = Ia * Ka)
+    shadeAmbient = CONSTS.lightAmbient * CONSTS.surfaceAmbient
 
-    # reflexÃ£o difusa
-    l = glm.normalize(objeto.lightPosition - point)
+    # reflexão difusa (Rd = Id * Kd * (l * n))
+    l = glm.normalize(CONSTS.lightPosition - point) # Luz - Ponto
     n = glm.normalize(normal)
     shadeDiffuse = objeto.lightDiffuse * objeto.surfaceDiffuse * glm.max(0.0, glm.dot(l,n))
 
-    # reflexÃ£o especular
+    # reflexão especular (Rs = Is  * Ks * (v * r)^e)
     v = glm.normalize(CONSTS.cameraPosition - point)
     r = 2*glm.dot(n,l)*n - l
     shadeSpecular = objeto.lightSpecular * objeto.surfaceSpecular * glm.max(0, glm.dot(v,r) ** objeto.surfaceShine)
 
-    # modelo de iluminaÃ§Ã£o de Phong
+    # modelo de iluminação de Phong (R = Ra + Rd + Rs)
     shade = shadeAmbient + shadeDiffuse + shadeSpecular
 
     return shade

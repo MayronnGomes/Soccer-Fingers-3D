@@ -32,14 +32,9 @@ winner = ""
 normal = glm.vec3(0, 0, 0)
 colisao = None
 cameraPosition = None
-# lightPosition = glm.vec3(0, 0, 30)
-# lightAmbient = glm.vec3(0.1)    
-# lightDiffuse = glm.vec3(1.0)                    
-# lightSpecular = glm.vec3(1.0)  
-# surfaceAmbient = glm.vec3(0.1)         
-# surfaceDiffuse = glm.vec3(1,1,1)              
-# surfaceSpecular = glm.vec3(0.5)                      
-# surfaceShine = 128
+lightAmbient = glm.vec3(0.1)    # Ia
+surfaceAmbient = glm.vec3(0.1)  # Ka   
+lightPosition = glm.vec3(0, 0, 30)
 
 SIGLAS = {}
 
