@@ -7,9 +7,18 @@ class Bola:
     def __init__(self, raio):
         self.raio = raio
         self.pos = glm.vec3(0, 0, 0)
+        self.lightPosition = glm.vec3(0, 0, 30)
+        self.lightAmbient = glm.vec3(0.1)    
+        self.lightDiffuse = glm.vec3(1.0)                    
+        self.lightSpecular = glm.vec3(1.0)  
+        self.surfaceAmbient = glm.vec3(0.1)         
+        self.surfaceDiffuse = glm.vec3(1,1,1)              
+        self.surfaceSpecular = glm.vec3(0.5)                      
+        self.surfaceShine = 128
+
 
     def desenha(self):
-        vertices, faces, face_materials = load_obj('../Texturas/Ball.obj')
+        vertices, faces, normals, face_materials = load_obj('../Texturas/Ball.obj')
         # Definir cores com base no material
         color_map = {
             'Bianco': (1.0, 1.0, 1.0),  # Branco
@@ -17,7 +26,6 @@ class Bola:
         }
 
         glPushMatrix()
-        # glTranslatef(0, 0, CONSTS.bolaRaio)
 
         for i, face in enumerate(faces):
             if len(face) == 3:
@@ -27,10 +35,11 @@ class Bola:
 
             material_name = face_materials[i]
             color = color_map.get(material_name, (1.0, 1.0, 1.0))  # Default to white if material not found
-            glColor3fv(color)
 
             for vertex in face:
-                glVertex3fv(vertices[vertex])
+                cor = shading(vertices[vertex], normals[vertex], self) * color
+                glColor3f(cor.x, cor.y, cor.z)
+                glVertex3f(*vertices[vertex])
 
             glEnd()
         

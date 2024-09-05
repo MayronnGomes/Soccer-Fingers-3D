@@ -48,6 +48,7 @@ def computeCylinderCoord(h, a, radius):
 def load_obj(filename):
     vertices = []
     faces = []
+    normals = []
     face_materials = []
     current_material = None
 
@@ -57,6 +58,10 @@ def load_obj(filename):
                 parts = line.split()
                 vertex = list(map(float, parts[1:4]))
                 vertices.append(vertex)
+            elif line.startswith('vn '):  # Linha de normal
+                parts = line.split()
+                normal = list(map(float, parts[1:4]))
+                normals.append(normal)
             elif line.startswith('usemtl'):  # Linha de material
                 current_material = line.split()[1]
             elif line.startswith('f '):  # Linha de face
@@ -68,7 +73,7 @@ def load_obj(filename):
                 faces.append(face)
                 face_materials.append(current_material)
 
-    return vertices, faces, face_materials
+    return vertices, faces, normals, face_materials
 
 def load_obj_gol(filename):
     vertices = []
@@ -102,3 +107,23 @@ def load_obj_gol(filename):
                 faces.append(face)
 
     return vertices, textures, normals, faces
+
+# Calcula a cor de sombreamento de um ponto usando o Modelo de IluminaÃ§Ã£o de Phong
+def shading(point, normal, objeto):
+    # reflexÃ£o ambiente
+    shadeAmbient = objeto.lightAmbient * objeto.surfaceAmbient
+
+    # reflexÃ£o difusa
+    l = glm.normalize(objeto.lightPosition - point)
+    n = glm.normalize(normal)
+    shadeDiffuse = objeto.lightDiffuse * objeto.surfaceDiffuse * glm.max(0.0, glm.dot(l,n))
+
+    # reflexÃ£o especular
+    v = glm.normalize(CONSTS.cameraPosition - point)
+    r = 2*glm.dot(n,l)*n - l
+    shadeSpecular = objeto.lightSpecular * objeto.surfaceSpecular * glm.max(0, glm.dot(v,r) ** objeto.surfaceShine)
+
+    # modelo de iluminaÃ§Ã£o de Phong
+    shade = shadeAmbient + shadeDiffuse + shadeSpecular
+
+    return shade

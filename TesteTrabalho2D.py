@@ -1,92 +1,75 @@
 from OpenGL.GL import *
 from OpenGL.GLUT import *
+from OpenGL.GLU import *
+import numpy as np
 import glm
-from PIL import Image
-import math
 
-def load_obj(filename):
-    vertices = []
-    textures = []
-    normals = []
-    faces = []
+# Variáveis globais para a câmera
+camera_pos = np.array([0.0, 0.0, 5.0], dtype=np.float32)
 
-    with open(filename, 'r') as file:
-        for line in file:
-            if line.startswith('v '):  # Linha de vértice
-                parts = line.split()
-                vertex = list(map(float, parts[1:4]))
-                vertices.append(vertex)
-            elif line.startswith('vt '):  # Linha de textura
-                parts = line.split()
-                texture = list(map(float, parts[1:3]))
-                textures.append(texture)
-            elif line.startswith('vn '):  # Linha de normal
-                parts = line.split()
-                normal = list(map(float, parts[1:4]))
-                normals.append(normal)
-            elif line.startswith('f '):  # Linha de face
-                parts = line.split()
-                face = []
-                for part in parts[1:]:
-                    vals = part.split('/')
-                    vertex_index = int(vals[0]) - 1
-                    texture_index = int(vals[1]) - 1 if len(vals) > 1 and vals[1] else None
-                    normal_index = int(vals[2]) - 1 if len(vals) > 2 and vals[2] else None
-                    face.append((vertex_index, texture_index, normal_index))
-                faces.append(face)
+def mat2list(M):
+    matrix = []
+    for i in range(0,4):
+        matrix.append(list(M[i]))
+    return matrix
 
-    return vertices, textures, normals, faces
+def init():
+    glEnable(GL_DEPTH_TEST)
 
-def draw_obj(vertices, textures, normals, faces):
-    for face in faces:
-        if len(face) == 3:
-            glBegin(GL_TRIANGLES)
-        else:
-            glBegin(GL_POLYGON)
-        
-        for vertex, texture, normal in face:
-            if texture is not None:
-                glTexCoord2fv(textures[texture])
-            if normal is not None:
-                glNormal3fv(normals[normal])
-            glVertex3fv(vertices[vertex])
-        
-        glEnd()
+def draw_skybox():
+    glBegin(GL_QUADS)
+    # Desenho simplificado do skybox (como antes)
+    glEnd()
+
+def draw_fixed_bar():
+    glMatrixMode(GL_PROJECTION)
+    glPushMatrix()
+    glLoadIdentity()
+    glOrtho(0, 800, 0, 600, -1, 1)  # Configuração da projeção ortográfica
+
+    glMatrixMode(GL_MODELVIEW)
+    glPushMatrix()
+    glLoadIdentity()
+
+    glColor3f(1.0, 0.0, 0.0)  # Cor da barra
+    glBegin(GL_QUADS)
+    glVertex2f(10, 10)
+    glVertex2f(200, 10)
+    glVertex2f(200, 60)
+    glVertex2f(10, 60)
+    glEnd()
+
+    glPopMatrix()
+    glMatrixMode(GL_PROJECTION)
+    glPopMatrix()
+    glMatrixMode(GL_MODELVIEW)
 
 def display():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glLoadIdentity()
-    
-    # Posicionando a câmera
-    glm.lookAt(glm.vec3(0, 0, 5), glm.vec3(0, 0, 0), glm.vec3(0, 0, 1))
 
-    glScalef(0.1, 0.1, 0.1)
+    # Configuração da visão da câmera
+    glFrustum(-1, 1, -1, 1, 2, 100)
+    matrizCamera = glm.lookAt(glm.vec3(camera_pos[0], camera_pos[1], camera_pos[2]), glm.vec3(-15, 0, 0), glm.vec3(0, 0, 1))
+    glLoadMatrixf(mat2list(matrizCamera))
 
-    draw_obj(vertices, textures, normals, faces)
+    draw_skybox()
+
+    # Desenho da barra fixa
+    draw_fixed_bar()
 
     glutSwapBuffers()
 
-def init_gl():
-    # glDisable(GL_LIGHTING)  # Desabilita iluminação
-    # glDisable(GL_COLOR_MATERIAL)  # Desabilita materiais
-    glEnable(GL_DEPTH_TEST)
-    glClearColor(0.1, 0.1, 0.1, 1.0)
-    glClearDepth(1.0)
-    glDepthFunc(GL_LEQUAL)
+def main():
+    glutInit(sys.argv)
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH)
+    glutInitWindowSize(800, 600)
+    glutCreateWindow("Skybox with Fixed Bar")
+
+    init()
+    glutDisplayFunc(display)
+    
+    glutMainLoop()
 
 if __name__ == "__main__":
-    # Carregando o arquivo OBJ
-    filename = "goal.obj"
-    vertices, textures, normals, faces = load_obj(filename)
-
-    # Inicializando a janela OpenGL
-    glutInit()
-    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH)
-    glutInitWindowSize(800, 600)
-    glutInitWindowPosition(100, 100)
-    glutCreateWindow(b"OBJ Viewer")
-    glutDisplayFunc(display)
-
-    init_gl()
-
-    glutMainLoop()
+    main()
