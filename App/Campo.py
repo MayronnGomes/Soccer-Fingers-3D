@@ -8,6 +8,11 @@ class Campo:
     def __init__(self, largura, altura):
         self.largura = largura
         self.altura = altura
+        self.lightDiffuse = glm.vec3(1.0)      # Id               
+        self.surfaceDiffuse = glm.vec3(1.0)    # Kd       
+        self.lightSpecular = glm.vec3(1.0)     # Is
+        self.surfaceSpecular = glm.vec3(0.5)   # Ks               
+        self.surfaceShine = 250                # e
 
     def desenha(self):
         gramado = Cube()
@@ -21,7 +26,7 @@ class Campo:
 
     def desenha_gol(self):
         filename = "../Texturas/goal.obj"
-        vertices, textures, normals, faces = load_obj_gol(filename)
+        vertices, _, normals, faces = load_obj_gol(filename)
         
         glPushMatrix()
         glTranslatef(-1, self.altura/2, 1.5)
@@ -33,12 +38,10 @@ class Campo:
             else:
                 glBegin(GL_POLYGON)
             
-            for vertex, texture, normal in face:
-                if texture is not None:
-                    glTexCoord2fv(textures[texture])
-                if normal is not None:
-                    glNormal3fv(normals[normal])
-                glVertex3fv(vertices[vertex])
+            for vertex, _, normal in face:
+                cor = shading(vertices[vertex], normals[normal], self)
+                glColor3f(cor.x, cor.y, cor.z)
+                glVertex3f(*vertices[vertex])
             
             glEnd()
 

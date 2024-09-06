@@ -133,6 +133,49 @@ def draw_grid(l, a, divisoes):
 #             glVertex3f(radius * math.cos(theta2), radius * math.sin(theta2), z1)
 #     glEnd()
 
+'''import glm
+from Util import *
+from OpenGL.GL import *
+
+class Cube:
+
+    def __init__(self):
+        self.lightDiffuse = glm.vec3(1.0)      # Id               
+        self.surfaceDiffuse = glm.vec3(1.0)    # Kd       
+        self.lightSpecular = glm.vec3(1.0)     # Is
+        self.surfaceSpecular = glm.vec3(0.5)   # Ks               
+        self.surfaceShine = 250                # e
+
+    def desenha(self, fill=False, invertido=False):
+
+        if fill:
+            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL )
+        else:
+            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE )
+
+        if CONSTS.cameraPosition is not None:
+            cor1 = shading(glm.vec3(0, 0, 0), glm.vec3(0, 0, 1), self)
+            cor2 = shading(glm.vec3(0, 1, 0), glm.vec3(0, 0, 1), self)
+            cor3 = shading(glm.vec3(1, 1, 0), glm.vec3(0, 0, 1), self)
+            cor4 = shading(glm.vec3(1, 0, 0), glm.vec3(0, 0, 1), self)
+        else:
+            cor1 = cor2 = cor3 = cor4 = glm.vec3(1, 1, 1)
+
+        if invertido:
+            glBegin(GL_QUADS)     
+            glColor3f(cor4.x, cor4.y, cor4.z); glTexCoord2f(0, 0); glVertex2f(1, 0)
+            glColor3f(cor3.x, cor3.y, cor3.z); glTexCoord2f(0, 1); glVertex2f(1, 1)
+            glColor3f(cor2.x, cor2.y, cor2.z); glTexCoord2f(1, 1); glVertex2f(0, 1)            
+            glColor3f(cor1.x, cor1.y, cor1.z); glTexCoord2f(1, 0); glVertex2f(0, 0)
+            glEnd()
+        else:
+            glBegin(GL_QUADS)
+            glColor3f(cor1.x, cor1.y, cor1.z); glTexCoord2f(0, 0); glVertex2f(0, 0)
+            glColor3f(cor2.x, cor2.y, cor2.z); glTexCoord2f(0, 1); glVertex2f(0, 1)
+            glColor3f(cor3.x, cor3.y, cor3.z); glTexCoord2f(1, 1); glVertex2f(1, 1)
+            glColor3f(cor4.x, cor4.y, cor4.z); glTexCoord2f(1, 0); glVertex2f(1, 0)
+            glEnd()
+'''
 def computeSphereCoord(long, lat, radius):
     long_rad = (math.pi / 180) * long
     lat_rad = (math.pi / 180) * lat
