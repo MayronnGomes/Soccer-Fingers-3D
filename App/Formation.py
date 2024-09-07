@@ -13,6 +13,7 @@ class Formation:
         glTranslatef(-CONSTS.mundoLar, -CONSTS.mundoAlt, 0)
         glScalef(2 * CONSTS.mundoLar, 2 * CONSTS.mundoAlt, 1)
         glBindTexture(GL_TEXTURE_2D, CONSTS.TELAS[tela])
+        glColor3f(1, 1, 1)
         cube.desenha(True)
         glBindTexture(GL_TEXTURE_2D, 0)
         glPopMatrix()

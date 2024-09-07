@@ -116,6 +116,9 @@ class Game:
         else:
             glOrtho(-CONSTS.mundoLar, CONSTS.mundoLar, -CONSTS.mundoAlt, CONSTS.mundoAlt, -1, 1)
 
+            glMatrixMode(GL_MODELVIEW)
+            glLoadIdentity()
+
             if self.tela == "inicial":
                 cube = Cube()
                 triangule = Triangle()
