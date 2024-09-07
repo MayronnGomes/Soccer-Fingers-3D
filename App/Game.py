@@ -75,8 +75,8 @@ class Game:
             glFrustum(-1, 1, -1, 1, 2, 100)
 
             glMatrixMode(GL_MODELVIEW)
-            CONSTS.cameraPosition = glm.vec3(self.bola.pos.x + 7, self.bola.pos.y, self.bola.pos.z + 5)
-            matrizCamera = glm.lookAt(CONSTS.cameraPosition, computeSphereCoord(CONSTS.camLong, CONSTS.camLat, 20), glm.vec3(0, 0, 1))
+            CONSTS.cameraPosition = computeSphereCoord(CONSTS.camLong, CONSTS.camLat, 10)
+            matrizCamera = glm.lookAt(CONSTS.cameraPosition, self.bola.pos, glm.vec3(0, 0, 1))
             glLoadMatrixf(mat2list(matrizCamera))
 
             glPushMatrix()

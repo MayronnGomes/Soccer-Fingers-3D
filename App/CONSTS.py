@@ -10,9 +10,9 @@ from PIL import Image
 
 FPS = 30
 divisaoCilindro = 15
-camLat = 0
+camLat = 25
 camLong = 180
-inc_ang = 1
+inc_ang = 3
 campoLar = 30
 campoAlt = 15
 bolaRaio = 1
@@ -47,7 +47,7 @@ TIME = {
 }
 
 CAMISAS_TIME = {
-    "belgica": glm.vec3(1, 0, 0),
+    "belgica": glm.vec3(0, 0, 0),
     "brasil": glm.vec3(1, 204/255, 0),
     "inglaterra": glm.vec3(1, 1, 1),
     "italia": glm.vec3(0, 130/255, 99/255)
