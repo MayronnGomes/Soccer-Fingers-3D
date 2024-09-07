@@ -10,6 +10,9 @@ from PIL import Image
 
 FPS = 30
 divisaoCilindro = 60
+camLat = 0
+camLong = 180
+inc_ang = 1
 campoLar = 30
 campoAlt = 15
 bolaRaio = 1
