@@ -1,75 +1,96 @@
-from OpenGL.GL import *
-from OpenGL.GLUT import *
-from OpenGL.GLU import *
 import numpy as np
-import glm
+import OpenGL.GL as gl
+import OpenGL.GLUT as glut
+import OpenGL.GLU as glu
 
-# Variáveis globais para a câmera
-camera_pos = np.array([0.0, 0.0, 5.0], dtype=np.float32)
+# Configurações iniciais
+width, height = 800, 600
 
-def mat2list(M):
-    matrix = []
-    for i in range(0,4):
-        matrix.append(list(M[i]))
-    return matrix
+def setup():
+    gl.glClearColor(0.0, 0.0, 0.0, 1.0)
+    gl.glEnable(gl.GL_DEPTH_TEST)
+    gl.glMatrixMode(gl.GL_PROJECTION)
+    gl.glLoadIdentity()
+    glu.gluPerspective(45, width / height, 0.1, 100.0)
+    gl.glMatrixMode(gl.GL_MODELVIEW)
+    gl.glLoadIdentity()
 
-def init():
-    glEnable(GL_DEPTH_TEST)
-
-def draw_skybox():
-    glBegin(GL_QUADS)
-    # Desenho simplificado do skybox (como antes)
-    glEnd()
-
-def draw_fixed_bar():
-    glMatrixMode(GL_PROJECTION)
-    glPushMatrix()
-    glLoadIdentity()
-    glOrtho(0, 800, 0, 600, -1, 1)  # Configuração da projeção ortográfica
-
-    glMatrixMode(GL_MODELVIEW)
-    glPushMatrix()
-    glLoadIdentity()
-
-    glColor3f(1.0, 0.0, 0.0)  # Cor da barra
-    glBegin(GL_QUADS)
-    glVertex2f(10, 10)
-    glVertex2f(200, 10)
-    glVertex2f(200, 60)
-    glVertex2f(10, 60)
-    glEnd()
-
-    glPopMatrix()
-    glMatrixMode(GL_PROJECTION)
-    glPopMatrix()
-    glMatrixMode(GL_MODELVIEW)
+def draw_cube():
+    gl.glBegin(gl.GL_QUADS)
+    
+    # Front Face
+    gl.glColor3f(1.0, 0.0, 0.0)
+    gl.glVertex3f(-1.0, -1.0,  1.0)
+    gl.glVertex3f( 1.0, -1.0,  1.0)
+    gl.glVertex3f( 1.0,  1.0,  1.0)
+    gl.glVertex3f(-1.0,  1.0,  1.0)
+    
+    # Back Face
+    gl.glColor3f(0.0, 1.0, 0.0)
+    gl.glVertex3f(-1.0, -1.0, -1.0)
+    gl.glVertex3f(-1.0,  1.0, -1.0)
+    gl.glVertex3f( 1.0,  1.0, -1.0)
+    gl.glVertex3f( 1.0, -1.0, -1.0)
+    
+    # Top Face
+    gl.glColor3f(0.0, 0.0, 1.0)
+    gl.glVertex3f(-1.0,  1.0, -1.0)
+    gl.glVertex3f(-1.0,  1.0,  1.0)
+    gl.glVertex3f( 1.0,  1.0,  1.0)
+    gl.glVertex3f( 1.0,  1.0, -1.0)
+    
+    # Bottom Face
+    gl.glColor3f(1.0, 1.0, 0.0)
+    gl.glVertex3f(-1.0, -1.0, -1.0)
+    gl.glVertex3f( 1.0, -1.0, -1.0)
+    gl.glVertex3f( 1.0, -1.0,  1.0)
+    gl.glVertex3f(-1.0, -1.0,  1.0)
+    
+    # Right face
+    gl.glColor3f(1.0, 0.0, 1.0)
+    gl.glVertex3f( 1.0, -1.0, -1.0)
+    gl.glVertex3f( 1.0,  1.0, -1.0)
+    gl.glVertex3f( 1.0,  1.0,  1.0)
+    gl.glVertex3f( 1.0, -1.0,  1.0)
+    
+    # Left Face
+    gl.glColor3f(0.0, 1.0, 1.0)
+    gl.glVertex3f(-1.0, -1.0, -1.0)
+    gl.glVertex3f(-1.0, -1.0,  1.0)
+    gl.glVertex3f(-1.0,  1.0,  1.0)
+    gl.glVertex3f(-1.0,  1.0, -1.0)
+    
+    gl.glEnd()
 
 def display():
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glLoadIdentity()
+    gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
+    gl.glLoadIdentity()
+    glu.gluLookAt(0.0, 0.0, 5.0,  0.0, 0.0, 0.0,  0.0, 1.0, 0.0)
 
-    # Configuração da visão da câmera
-    glFrustum(-1, 1, -1, 1, 2, 100)
-    matrizCamera = glm.lookAt(glm.vec3(camera_pos[0], camera_pos[1], camera_pos[2]), glm.vec3(-15, 0, 0), glm.vec3(0, 0, 1))
-    glLoadMatrixf(mat2list(matrizCamera))
+    # Draw the cube
+    draw_cube()
 
-    draw_skybox()
+    glut.glutSwapBuffers()
 
-    # Desenho da barra fixa
-    draw_fixed_bar()
-
-    glutSwapBuffers()
+def reshape(width, height):
+    gl.glViewport(0, 0, width, height)
+    gl.glMatrixMode(gl.GL_PROJECTION)
+    gl.glLoadIdentity()
+    glu.gluPerspective(45, width / height, 0.1, 100.0)
+    gl.glMatrixMode(gl.GL_MODELVIEW)
 
 def main():
-    glutInit(sys.argv)
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH)
-    glutInitWindowSize(800, 600)
-    glutCreateWindow("Skybox with Fixed Bar")
-
-    init()
-    glutDisplayFunc(display)
+    glut.glutInit()
+    glut.glutInitDisplayMode(glut.GLUT_DOUBLE | glut.GLUT_RGB | glut.GLUT_DEPTH)
+    glut.glutInitWindowSize(width, height)
+    glut.glutCreateWindow(b'OpenGL Clipping Example')
     
-    glutMainLoop()
+    setup()
+    
+    glut.glutDisplayFunc(display)
+    glut.glutReshapeFunc(reshape)
+    
+    glut.glutMainLoop()
 
 if __name__ == "__main__":
     main()

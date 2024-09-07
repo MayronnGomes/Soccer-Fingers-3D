@@ -28,8 +28,6 @@ class Game:
         glutSpecialUpFunc(self.tecladoEspecialUp)
         glutReshapeFunc(self.reshape)
         glutDisplayFunc(self.desenha)
-        glutMouseFunc(self.mouse)
-        glutMotionFunc(self.motion)
         glutMainLoop()
 
     def inicio(self):
@@ -75,12 +73,10 @@ class Game:
         glLoadIdentity()
         
         if self.tela == "jogo":
-            # glOrtho(-CONSTS.mundoLar, CONSTS.mundoLar, -CONSTS.mundoAlt, CONSTS.mundoAlt, -1, 1)
-
             glFrustum(-1, 1, -1, 1, 2, 100)
 
             glMatrixMode(GL_MODELVIEW)
-            CONSTS.cameraPosition = glm.vec3(7, 0, 5)
+            CONSTS.cameraPosition = glm.vec3(self.bola.pos.x + 7, self.bola.pos.y, self.bola.pos.z + 5)
             matrizCamera = glm.lookAt(CONSTS.cameraPosition, computeSphereCoord(CONSTS.camLong, CONSTS.camLat, 20), glm.vec3(0, 0, 1))
             glLoadMatrixf(mat2list(matrizCamera))
 
@@ -252,53 +248,6 @@ class Game:
                 self.bola.move()
 
         glutPostRedisplay()
-
-    def mouse(self, button, state, x, y):
-
-        model_view = glGetDoublev(GL_MODELVIEW_MATRIX)
-        projection = glGetDoublev(GL_PROJECTION_MATRIX)
-        viewport = glGetIntegerv(GL_VIEWPORT)
-
-        win_x = float(x)
-        win_y = float(viewport[3] - y)
-        win_z = 0.0
-
-        normalized_x, normalized_y, _ = gluUnProject(win_x, win_y, win_z, model_view, projection, viewport)
-        normalized_x = round(normalized_x, 3)
-        normalized_y = round(normalized_y, 3)
-
-        if button == GLUT_LEFT_BUTTON and state == GLUT_DOWN:
-            if (self.bola.pos.x - CONSTS.bolaRaio) <= normalized_x <= (self.bola.pos.x + CONSTS.bolaRaio) and (self.bola.pos.y - CONSTS.bolaRaio) <= normalized_y <= (self.bola.pos.y + CONSTS.bolaRaio) and not CONSTS.mov:
-                CONSTS.progressbar = True
-                CONSTS.forca.x = normalized_x - self.bola.pos.x
-                CONSTS.forca.y = normalized_y - self.bola.pos.y
-                CONSTS.angleProgressbar = math.degrees(math.atan2(CONSTS.forca.y, CONSTS.forca.x))
-
-        elif button == GLUT_LEFT_BUTTON and state == GLUT_UP:
-            CONSTS.progressbar = False
-            if (abs(CONSTS.forca.x) > 0 or abs(CONSTS.forca.y) > 0 or abs(CONSTS.forca.z) > 0) and not CONSTS.mov:
-                CONSTS.mov = True
-                CONSTS.forca *= -1
-                CONSTS.velocidade = glm.normalize(CONSTS.forca) * 0.2
-    
-    def motion(self, x, y):
-
-        if CONSTS.progressbar:
-            
-            model_view = glGetDoublev(GL_MODELVIEW_MATRIX)
-            projection = glGetDoublev(GL_PROJECTION_MATRIX)
-            viewport = glGetIntegerv(GL_VIEWPORT)
-
-            win_x = float(x)
-            win_y = float(viewport[3] - y)  # Inverte a coordenada Y da janela
-            win_z = 0.0  # Para 2D, a profundidade é geralmente 0
-
-            normalized_x, normalized_y, _ = gluUnProject(win_x, win_y, win_z, model_view, projection, viewport)
-            normalized_x = round(normalized_x, 3)
-            normalized_y = round(normalized_y, 3)
-            CONSTS.forca.x = normalized_x - self.bola.pos.x
-            CONSTS.forca.y = normalized_y - self.bola.pos.y
-            CONSTS.angleProgressbar = math.degrees(math.atan2(CONSTS.forca.y, CONSTS.forca.x))
 
     def tecladoASCII(self, key, x, y):
         if key == b'\r':
