@@ -13,10 +13,6 @@ class Placar:
     def desenha(self):
         cubo = Cube()
         glPushMatrix()
-        glTranslatef(-20,0,0)
-        glRotatef(90, 0, 1, 0)
-        glRotatef(90, 0, 0, 1)
-        glScalef(0.7, 0.7, 1)
 
         glPushMatrix()
         glTranslatef(0,3,0)
