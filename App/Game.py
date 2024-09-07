@@ -102,8 +102,8 @@ class Game:
             self.bola.desenha()
             glPopMatrix()
 
-            # self.timeA.desenha()
-            # self.timeB.desenha()
+            self.timeA.desenha()
+            self.timeB.desenha()
 
             glPopMatrix()
             glPopMatrix()

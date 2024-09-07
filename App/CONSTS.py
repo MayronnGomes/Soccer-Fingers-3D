@@ -9,7 +9,7 @@ from OpenGL.GLU import *
 from PIL import Image
 
 FPS = 30
-divisaoCilindro = 60
+divisaoCilindro = 15
 camLat = 0
 camLong = 180
 inc_ang = 1
