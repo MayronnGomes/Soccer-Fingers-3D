@@ -25,7 +25,7 @@ class Campo:
         glPopMatrix()
 
     def desenha_gol(self):
-        filename = "../Texturas/goal.obj"
+        filename = "../Texturas/Soccergoal.obj"
         vertices, _, normals, faces = load_obj_gol(filename)
         
         glPushMatrix()
