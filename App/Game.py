@@ -107,11 +107,18 @@ class Game:
             glPopMatrix()
             glPopMatrix()
 
+            glMatrixMode(GL_PROJECTION)
+            glLoadIdentity()
+            glOrtho(-CONSTS.mundoLar, CONSTS.mundoLar, -CONSTS.mundoAlt, CONSTS.mundoAlt, -1, 1)
+            glMatrixMode(GL_MODELVIEW)
+            glLoadIdentity()
+            glDisable(GL_DEPTH_TEST)
+
             glPushMatrix()
             self.placar.desenha()
-            glScalef(-1, -1, 1)
-            self.placar.desenha()
             glPopMatrix()
+
+            glEnable(GL_DEPTH_TEST)
 
         else:
             glOrtho(-CONSTS.mundoLar, CONSTS.mundoLar, -CONSTS.mundoAlt, CONSTS.mundoAlt, -1, 1)
