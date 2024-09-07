@@ -1,225 +1,91 @@
 from OpenGL.GL import *
 from OpenGL.GLUT import *
-import glm 
+import glm
 
-# constantes
-FPS = 30    
-FLAT = 1    
-GOURAUD = 2
+class Objeto:
+    # Construtor
+    def __init__(self,posicao,direcao,cor):
+        self.posicao = posicao      # posição do objeto
+        self.direcao = direcao      # vetor de direção de movimento
+        self.cor = cor              # cor do objeto
 
-# variÃ¡veis globais
-janelaLargura = 500                                              # largura da janela em pixels
-janelaAltura = 500                                               # altura da janela em pixels
-cameraPosition = glm.vec3(20, -10, 20)                           # posiÃ§Ã£o da cÃ¢mera
-lightPosition = glm.vec3(5,5,5)                                  # posiÃ§Ã£o da fonte de luz pontual
-lightSpin = True                                                 # indica se a fonte de luz gira em torno da superfÃ­cie ou nÃ£o
-lightRotation = glm.rotate(glm.mat4(1.0), 0.01, glm.vec3(0,0,1)) # matriz de rotaÃ§Ã£o para girar a fonte de luz
-lightAmbient = glm.vec3(0.1)                                     # propriedade ambiente da fonte de luz
-lightDiffuse = glm.vec3(1.0)                                     # propriedade difusa da fonte de luz
-lightSpecular = glm.vec3(1.0)                                    # propriedade especular da fonte de luz
-surfaceSize = 20.0                                               # tamanho da lateral da superfÃ­cie
-surfaceDivisions = 10                                            # qtd de subdivisÃµes das laterais da superfÃ­cie
-surfaceAmbient = glm.vec3(0.1)                                   # propriedade ambiente do material da superfÃ­cie
-surfaceDiffuse = glm.vec3(0,1,1)                                 # propriedade difusa do material da superfÃ­cie
-surfaceSpecular = glm.vec3(0.5)                                  # propriedade especular do material da superfÃ­cie
-surfaceShine = 128                                               # propriedade da especularidade do material da superfÃ­cie
-shadingType = FLAT                                               # tipo de sombreamento
+    # Método responsável por mover o objeto uma certa distância na direção atual
+    def move(self):
+        global deslocamento, t
+        self.posicao = self.posicao + t * forca
+        deslocamento += t * forca
+        if deslocamento.x >= forca.x/2:
+            t = max(0.01, t - aceleracao)
 
-#FunÃ§Ã£o contendo configuraÃ§Ãµes iniciais
+    # Método responsável por desenhar o objeto na tela (um simples ponto neste caso)
+    def desenha(self):
+        glColor3f(self.cor.r, self.cor.g, self.cor.b)
+        glBegin(GL_POINTS)
+        glVertex2f(self.posicao.x, self.posicao.y)
+        glEnd()
+
+# Q = P + t * v
+
+# Variáveis globais
+FPS = 60          # quantidade de frames por segundo que deseja-se atualizar a aplicação
+cenarioTam = 10   # coordenada máxima em x e em y nas dimensões do mundo exibido na janela
+forca = glm.vec2(4, 5)
+deslocamento = glm.vec2(0, 0)
+aceleracao = 0.003
+t = 0.03
+objA = Objeto(glm.vec2(0,0),   # posição inicial do objeto (origem)
+              glm.vec2(1,0),   # direção inicial de movimento do objeto (eixo x positivo = horizontal pra direita)
+              glm.vec3(1,0,0)) # cor do objeto (vermelho)
+
+# Função para agrupar as configurações iniciais do OpenGL
 def inicio():
-    glClearColor(0,0,0,1)
-    glPointSize(5)
-    glLineWidth(1)              # altera a largura das linhas para 1 pixel
-    glEnable(GL_DEPTH_TEST)     # habilitando a remoÃ§Ã£o de faces que estejam atrÃ¡s de outras (remoÃ§Ã£o de faces traseiras)
+    glClearColor(1,1,1,1)       # função que define a cor de fundo usada pelo OpenGL para limpar a tela
+    glPointSize(30)             # altera o tamanho dos pontos (por padrão, o tamanho é igual a 1 pixel)
+    glLineWidth(3)              # altera a largura dos segmentos de reta (por padrão, a largura é de 1 pixel)
+    glEnable(GL_MULTISAMPLE)    # habilita anti-aliasing (fará o ponto parecer arredondado)
 
-#FunÃ§Ã£o que converte glm.mat4 em list<float>
-def mat2list(M):
-    matrix = []
-    for i in range(0,4):
-        matrix.append(list(M[i]))
-    return matrix
-
-# FunÃ§Ã£o que trata alteraÃ§Ãµes no tamanho da janela
-def alteraJanela(largura, altura):
-    global janelaLargura, janelaAltura, aspectRatio
-    janelaLargura = largura
-    janelaAltura = altura
-    glViewport(0,0,largura,altura) # reserva a Ã¡rea inteira da janela para desenhar
-
-# FunÃ§Ã£o que trata entrada de teclado
-def teclado(key, x, y):
-    global surfaceDivisions, shadingType, lightSpin
-    if key == b'd':
-        surfaceDivisions -= 1     # diminui a quantidade de subdivisÃµes da superfÃ­cie
-    elif key == b'D':
-        surfaceDivisions += 1     # aumenta a quantidade de subdivisÃµes da superfÃ­cie
-    elif key == b'f':
-        shadingType = FLAT        # define que o tipo de sombreamento usado serÃ¡ FLAT (uma cor por face)
-    elif key == b'g':
-        shadingType = GOURAUD     # define que o tipo de sombreamento usado serÃ¡ GOURAUD (uma cor por vÃ©rtice)
-    elif key == b' ':
-        lightSpin = not lightSpin # interrompe ou continua o giro da fonte de luz sobre a superfÃ­cie
-
-#FunÃ§Ã£o que altera variÃ¡veis de translaÃ§Ã£o, escala e rotaÃ§Ã£o a cada frame e manda redesenhar a tela
+# Função que será chamada a cada 1000/FPS milissegundos
 def timer(v):
-    global lightPosition
+    global objA, forca
     
-    glutTimerFunc(int(1000/FPS), timer, 0) 
+    # a cada frame é necessário chamar essa função para 'agendar' a sua próxima execução
+    glutTimerFunc(int(1000/FPS), timer, 0)  
     
-    if lightSpin:                                                                # se o giro da fonte de luz estiver habilitado
-        lightPosition = glm.vec3(lightRotation * glm.vec4(lightPosition, 1.0))   # aplicaÃ§Ã£o da rotaÃ§Ã£o sobre a posiÃ§Ã£o da fonte de luz para mantÃª-la em movimento
+    #ações a serem realizadas a cada frame
+    if (deslocamento.x >= forca.x) and (deslocamento.y >= forca.y):
+        print("movimento parou")
+        forca = glm.vec2(0)
+    else:
+        objA.move()
+        
 
-    glutPostRedisplay()
+        
+    # atualiza o frame buffer
+    glutPostRedisplay()                     
 
-# Calcula a cor de sombreamento de um ponto usando o Modelo de IluminaÃ§Ã£o de Phong
-def shading(point, normal):
-    # reflexÃ£o ambiente
-    shadeAmbient = lightAmbient * surfaceAmbient
-
-    # reflexÃ£o difusa
-    l = glm.normalize(lightPosition - point)
-    n = glm.normalize(normal)
-    shadeDiffuse = lightDiffuse * surfaceDiffuse * glm.max(0.0, glm.dot(l,n))
-
-    # reflexÃ£o especular
-    v = glm.normalize(cameraPosition - point)
-    r = 2*glm.dot(n,l)*n - l
-    shadeSpecular = lightSpecular * surfaceSpecular * glm.max(0, glm.dot(v,r) ** surfaceShine)
-
-    # modelo de iluminaÃ§Ã£o de Phong
-    shade = shadeAmbient + shadeDiffuse + shadeSpecular
-
-    return shade
-
-# Desenha superfÃ­cie calculando iluminaÃ§Ã£o por face (Sombreamento Flat)
-def drawFlat():
-    #desenhando uma grade de triÃ¢ngulos
-    delta = surfaceSize / surfaceDivisions   #distÃ¢ncia entre um vÃ©rtice e o prÃ³ximo tanto na direÃ§Ã£o do eixo x, quanto na direÃ§Ã£o do eixo y
-    glBegin(GL_TRIANGLES)
-    for i in range(0,surfaceDivisions):    
-        for j in range(0,surfaceDivisions):
-            p1 = glm.vec3(0.0)
-            p2 = glm.vec3(0.0)
-            p3 = glm.vec3(0.0)
-            p4 = glm.vec3(0.0)
-            
-            # a cada passo do laÃ§o, desenha-se um quadrado p1-p2-p3-p4 formado por dois triangulos p1-p2-p3 e p1-p3-p4
-            p1.x = -surfaceSize/2 + i*delta         # ponto 1
-            p1.y = -surfaceSize/2 + j*delta
-            p2.x = -surfaceSize/2 + (i+1)*delta     # ponto 2
-            p2.y = -surfaceSize/2 + j*delta
-            p3.x = -surfaceSize/2 + (i+1)*delta     # ponto 3
-            p3.y = -surfaceSize/2 + (j+1)*delta
-            p4.x = -surfaceSize/2 + i*delta         # ponto 4
-            p4.y = -surfaceSize/2 + (j+1)*delta
-            
-            # como todos os triÃ¢ngulos estÃ£o no plano xy, eles possuem a mesma normal (vÃ¡lido apenas para este caso especÃ­fico)
-            normal = glm.vec3(0,0,1)    
-
-            # desenhando o triÃ¢ngulo p1-p2-p3
-            pc = (1.0/3.0)*(p1+p2+p3)     # calculando o centro do triÃ¢ngulo p1-p2-p3
-            cor = shading(pc,normal)      # calculando o sombreamento do ponto pc
-            glColor3f(cor.r,cor.g,cor.b)  # aplicando essa cor no desenho do triÃ¢ngulo p1-p2-p3
-            glVertex3f(p1.x,p1.y,p1.z)
-            glVertex3f(p2.x,p2.y,p2.z)
-            glVertex3f(p3.x,p3.y,p3.z)
-
-            # desenhando o triÃ¢ngulo p1-p3-p4
-            pc = (1/3)*(p1+p3+p4)         # calculando o centro do triÃ¢ngulo p1-p3-p4
-            cor = shading(pc,normal)      # calculando o sombreamento do ponto pc
-            glColor3f(cor.r,cor.g,cor.b)  # aplicando essa cor no desenho do triÃ¢ngulo p1-p3-p4
-            glVertex3f(p1.x,p1.y,p1.z)
-            glVertex3f(p3.x,p3.y,p3.z)
-            glVertex3f(p4.x,p4.y,p4.z)
-    glEnd()
-
-# Desenha superfÃ­cie calculando iluminaÃ§Ã£o por face (Sombreamento Gouraud)
-def drawGouraud():
-    #desenhando uma grade de triÃ¢ngulos
-    delta = surfaceSize / surfaceDivisions   #distÃ¢ncia entre um vÃ©rtice e o prÃ³ximo tanto na direÃ§Ã£o do eixo x, quanto na direÃ§Ã£o do eixo y
-    glBegin(GL_TRIANGLES)
-    for i in range(0,surfaceDivisions):    
-        for j in range(0,surfaceDivisions):
-            p1 = glm.vec3(0.0)
-            p2 = glm.vec3(0.0)
-            p3 = glm.vec3(0.0)
-            p4 = glm.vec3(0.0)
-            
-            # a cada passo do laÃ§o, desenha-se um quadrado p1-p2-p3-p4 formado por dois triangulos p1-p2-p3 e p1-p3-p4
-            p1.x = -surfaceSize/2 + i*delta         # ponto 1
-            p1.y = -surfaceSize/2 + j*delta
-            p2.x = -surfaceSize/2 + (i+1)*delta     # ponto 2
-            p2.y = -surfaceSize/2 + j*delta
-            p3.x = -surfaceSize/2 + (i+1)*delta     # ponto 3
-            p3.y = -surfaceSize/2 + (j+1)*delta
-            p4.x = -surfaceSize/2 + i*delta         # ponto 4
-            p4.y = -surfaceSize/2 + (j+1)*delta
-            
-            # como todos os triÃ¢ngulos estÃ£o no plano xy, eles possuem a mesma normal (vÃ¡lido apenas para este caso especÃ­fico)
-            normal = glm.vec3(0,0,1)    
-
-            # calculando o sombreando dos 4 vÃ©rtices do quadrado
-            cor1 = shading(p1,normal) # calculando o sombreamento do ponto p1
-            cor2 = shading(p2,normal) # calculando o sombreamento do ponto p2
-            cor3 = shading(p3,normal) # calculando o sombreamento do ponto p3
-            cor4 = shading(p4,normal) # calculando o sombreamento do ponto p4
-
-            # desenhando o triÃ¢ngulo p1-p2-p3 (aplicando o sombreando de cada ponto individualmente)
-            glColor3f(cor1.r,cor1.g,cor1.b) 
-            glVertex3f(p1.x,p1.y,p1.z)
-            glColor3f(cor2.r,cor2.g,cor2.b) 
-            glVertex3f(p2.x,p2.y,p2.z)
-            glColor3f(cor3.r,cor3.g,cor3.b) 
-            glVertex3f(p3.x,p3.y,p3.z)
-
-            # desenhando o triÃ¢ngulo p1-p3-p4 (aplicando o sombreando de cada ponto individualmente)
-            glColor3f(cor1.r,cor1.g,cor1.b) 
-            glVertex3f(p1.x,p1.y,p1.z)
-            glColor3f(cor3.r,cor3.g,cor3.b) 
-            glVertex3f(p3.x,p3.y,p3.z)
-            glColor3f(cor4.r,cor4.g,cor4.b) 
-            glVertex3f(p4.x,p4.y,p4.z)
-    glEnd()
-
-# FunÃ§Ã£o usada para redesenhar o conteÃºdo do frame buffer
+# Função que será chamada cada vez que o conteúdo da janela precisar ser redesenhado
 def desenha():
-    # Limpando frame buffer e depth buffer antes de cada frame
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    # Limpa o conteúdo do frame buffer aplicando a cor usada em glClearColor em toda a imagem
+    glClear(GL_COLOR_BUFFER_BIT) 
 
-    # Definindo a projeÃ§Ã£o
+    # definindo a área de visualização
     glMatrixMode(GL_PROJECTION)
-    aspectRatio = janelaLargura/janelaAltura
-    matrizProjecao = glm.perspective(glm.radians(45.0), aspectRatio, 1, 100) 
-    glLoadMatrixf(mat2list(matrizProjecao))                                  
-
-    # Definindo a cÃ¢mera
-    glMatrixMode(GL_MODELVIEW) 
-    matrizCamera = glm.lookAt(cameraPosition, glm.vec3(0), glm.vec3(0,0,1)) 
-    glLoadMatrixf(mat2list(matrizCamera))                              
-
-    # Desenhando a superfÃ­cie com o sombremento escolhido (Flat ou Gouraud)
-    if shadingType == FLAT:      drawFlat()     
-    elif shadingType == GOURAUD: drawGouraud()  
+    glLoadIdentity()
+    glOrtho(-cenarioTam, cenarioTam, -cenarioTam, cenarioTam, -1, 1)
     
-    # Desenhando a fonte de luz (um simples ponto para poder localizÃ¡-la dentro da imagem)
-    glColor3f(1,1,0)
-    glBegin(GL_POINTS)
-    glVertex3f(lightPosition.x, lightPosition.y, lightPosition.z)
-    glEnd()
+    # desenhando os objetos
+    objA.desenha()
 
-    glutSwapBuffers() 
+    # Mostrar a desenho feito no framebuffer na janela
+    glFlush() 
 
-#Corpo principal do cÃ³digo
-glutInit()
-glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA) 
-glutInitWindowSize(int(janelaLargura),int(janelaAltura))
-glutInitWindowPosition(0,0)
-glutCreateWindow("Modelo de Iluminacao de Phong")
-inicio()
-glutDisplayFunc(desenha)
-glutReshapeFunc(alteraJanela)
-glutKeyboardFunc(teclado)
-glutTimerFunc(int(1000/FPS), timer, 0)
-glutMainLoop()
-
-
+# Corpo inicial do código
+glutInit()                                                        
+glutInitDisplayMode(GLUT_MULTISAMPLE | GLUT_SINGLE | GLUT_RGB) # configurações do frame buffer (GLUT_MULTISAMPLE = várias amostras por pixel (anti-aliasing))
+glutInitWindowSize(500,500)                                    
+glutInitWindowPosition(0,0)                                    
+glutCreateWindow('Evento de timer')                            
+inicio()                                                       
+glutTimerFunc(int(1000/FPS), timer, 0) # função 'timer' será chamada daqui a 1000/FPS milissegundos
+glutDisplayFunc(desenha)                                       
+glutMainLoop()                                                 
