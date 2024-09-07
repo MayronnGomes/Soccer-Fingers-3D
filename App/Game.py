@@ -80,21 +80,21 @@ class Game:
             glFrustum(-1, 1, -1, 1, 2, 100)
 
             glMatrixMode(GL_MODELVIEW)
-            CONSTS.cameraPosition = glm.vec3(self.bola.pos.x + 7, self.bola.pos.y, self.bola.pos.z + 5)
-            matrizCamera = glm.lookAt(CONSTS.cameraPosition, glm.vec3(-15, 0, 0), glm.vec3(0, 0, 1))
+            CONSTS.cameraPosition = glm.vec3(7, 0, 5)
+            matrizCamera = glm.lookAt(CONSTS.cameraPosition, computeSphereCoord(CONSTS.camLong, CONSTS.camLat, 20), glm.vec3(0, 0, 1))
             glLoadMatrixf(mat2list(matrizCamera))
 
             glPushMatrix()
             glTranslatef(-(self.campo.largura/2), -(self.campo.altura/2), 0)
             self.campo.desenha()
             # gol esquerdo
-            self.campo.desenha_gol()
+            # self.campo.desenha_gol()
 
             # gol direito
             glPushMatrix()
             glTranslatef(CONSTS.campoLar, 0, 0)
             glScalef(-1, 1, 1)
-            self.campo.desenha_gol()
+            # self.campo.desenha_gol()
             glPopMatrix()
 
             glPushMatrix()
@@ -106,8 +106,8 @@ class Game:
             self.bola.desenha()
             glPopMatrix()
 
-            self.timeA.desenha()
-            self.timeB.desenha()
+            # self.timeA.desenha()
+            # self.timeB.desenha()
 
             glPopMatrix()
             glPopMatrix()
@@ -362,6 +362,16 @@ class Game:
                 self.formation.option += 4 if self.formation.option < 5 else 0
             elif key == GLUT_KEY_UP:
                 self.formation.option -= 4 if self.formation.option > 4 else 0
+        elif self.tela == "jogo":
+            if key == GLUT_KEY_RIGHT:
+                CONSTS.camLong = glm.clamp(CONSTS.camLong - CONSTS.inc_ang, 0, 360)
+            elif key == GLUT_KEY_LEFT:
+                CONSTS.camLong = glm.clamp(CONSTS.camLong + CONSTS.inc_ang, 0, 360)
+            elif key == GLUT_KEY_DOWN:
+                CONSTS.camLat = glm.clamp(CONSTS.camLat - CONSTS.inc_ang, -89, 89)
+            elif key == GLUT_KEY_UP:
+                CONSTS.camLat = glm.clamp(CONSTS.camLat + CONSTS.inc_ang, -89, 89)
+            print(CONSTS.camLat, CONSTS.camLong)
          
     def tecladoEspecialUp(self, key, x, y):
         if (key == GLUT_KEY_DOWN or key == GLUT_KEY_UP) and self.tela == "inicial":

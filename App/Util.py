@@ -45,6 +45,14 @@ def computeCylinderCoord(h, a, radius):
     z = h
     return glm.vec3(x, y, z)
 
+def computeSphereCoord(long, lat, radius=1):
+    long_rad = (math.pi / 180) * long
+    lat_rad = (math.pi / 180) * lat
+    x = radius * math.cos(long_rad) * math.cos(lat_rad)
+    y = radius * math.sin(long_rad) * math.cos(lat_rad)
+    z = radius * math.sin(lat_rad)
+    return glm.vec3(x, y, z)
+
 def load_obj(filename):
     vertices = []
     faces = []
