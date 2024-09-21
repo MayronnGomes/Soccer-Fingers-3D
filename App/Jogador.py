@@ -29,7 +29,7 @@ class Jogador:
         glBindTexture(GL_TEXTURE_2D, 0)     
 
     def verifica_colisao(self, bola):
-        if CONSTS.bolaRaio/2 + self.raio/2 > glm.distance(self.posicao, bola.pos):
+        if CONSTS.bolaRaio + self.raio/2 > glm.distance(self.posicao, bola.pos):
             C = self.posicao - bola.pos
             CONSTS.normal = glm.normalize(C)
             return True
