@@ -75,7 +75,7 @@ class Game:
             glFrustum(-1, 1, -1, 1, 2, 100)
 
             glMatrixMode(GL_MODELVIEW)
-            CONSTS.cameraPosition = computeSphereCoord(CONSTS.camLong, CONSTS.camLat, 10)
+            CONSTS.cameraPosition = self.bola.pos + computeSphereCoord(CONSTS.camLong, CONSTS.camLat, 10)
             matrizCamera = glm.lookAt(CONSTS.cameraPosition, self.bola.pos, glm.vec3(0, 0, 1))
             glLoadMatrixf(mat2list(matrizCamera))
 
@@ -96,7 +96,7 @@ class Game:
             glTranslatef(self.campo.largura/2, self.campo.altura/2, 0)
             
             glPushMatrix()
-            glTranslatef(0, 0, self.bola.raio/2)
+            glTranslatef(self.bola.pos.x, self.bola.pos.y, self.bola.raio/2)
             glScalef(self.bola.raio/2, self.bola.raio/2, self.bola.raio/2)
             self.bola.desenha()
             glPopMatrix()
@@ -229,7 +229,17 @@ class Game:
         if CONSTS.mov:
 
             # movimento da bola parou
-            if (abs(CONSTS.deslocamento.x + CONSTS.velocidade.x) > abs(CONSTS.forca.x) or abs(CONSTS.deslocamento.y + CONSTS.velocidade.y) > abs(CONSTS.forca.y)):
+            if abs(CONSTS.deslocamento.x) > abs(CONSTS.forca.x) or abs(CONSTS.deslocamento.y) > abs(CONSTS.forca.y):
+                
+                if self.campo.colisao_gol(self.bola, self.placar):
+                    self.gameover()
+                    self.bola.pos = glm.vec3(0, 0, 0)
+                    self.timeA.alterarFormacao()
+                    self.timeB.alterarFormacao()
+
+                    if self.vencedor(self.placar):
+                        # self.desenha(winner) # desenha uma mensagem de vencedor
+                        print(f'vencedor {CONSTS.winner}') 
                 
                 print('Movimento parou')
                 self.gameover()
@@ -283,6 +293,13 @@ class Game:
             elif self.tela == "formação2":
                 self.timeB.formacao = CONSTS.FORMATION[str(self.formation.option)]
                 self.tela = "jogo"
+            elif self.tela == "jogo" and not CONSTS.mov:
+                CONSTS.forca =  self.bola.pos - CONSTS.cameraPosition
+                CONSTS.forca.x = round(CONSTS.forca.x, 3)
+                CONSTS.forca.y = round(CONSTS.forca.y, 3)
+                CONSTS.forca.z = 0
+                CONSTS.velocidade = glm.normalize(CONSTS.forca) * 0.2
+                CONSTS.mov = True
         elif key.lower() == b'f' and self.tela == "jogo":
             self.tela = "formação1"
             glutPostRedisplay()
@@ -329,7 +346,7 @@ class Game:
                 CONSTS.camLat = glm.clamp(CONSTS.camLat - CONSTS.inc_ang, -89, 89)
             elif key == GLUT_KEY_UP:
                 CONSTS.camLat = glm.clamp(CONSTS.camLat + CONSTS.inc_ang, -89, 89)
-            print(CONSTS.camLat, CONSTS.camLong)
+            # print(CONSTS.camLat, CONSTS.camLong)
          
     def tecladoEspecialUp(self, key, x, y):
         if (key == GLUT_KEY_DOWN or key == GLUT_KEY_UP) and self.tela == "inicial":
@@ -355,7 +372,6 @@ class Game:
         CONSTS.forca.x = CONSTS.forca.y = CONSTS.forca.z = 0
         CONSTS.deslocamento.x = CONSTS.deslocamento.y = CONSTS.deslocamento.z = 0
         CONSTS.velocidade.x = CONSTS.velocidade.y = CONSTS.velocidade.z = 0
-        CONSTS.angleProgressbar = 0.0
 
 if __name__ == "__main__":
     game = Game()
