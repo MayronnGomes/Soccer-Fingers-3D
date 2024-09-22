@@ -339,14 +339,23 @@ class Game:
                 self.formation.option -= 4 if self.formation.option > 4 else 0
         elif self.tela == "jogo":
             if key == GLUT_KEY_RIGHT:
-                CONSTS.camLong = glm.clamp(CONSTS.camLong - CONSTS.inc_ang, 0, 360)
+                if (CONSTS.camLong - CONSTS.inc_ang) < 0:
+                    CONSTS.camLong = 360
+                elif (CONSTS.camLong - CONSTS.inc_ang) > 360:
+                    CONSTS.camLong = 0
+                else:
+                    CONSTS.camLong -= CONSTS.inc_ang
             elif key == GLUT_KEY_LEFT:
-                CONSTS.camLong = glm.clamp(CONSTS.camLong + CONSTS.inc_ang, 0, 360)
+                if (CONSTS.camLong + CONSTS.inc_ang) < 0:
+                    CONSTS.camLong = 360
+                elif (CONSTS.camLong + CONSTS.inc_ang) > 360:
+                    CONSTS.camLong = 0
+                else:
+                    CONSTS.camLong += CONSTS.inc_ang
             elif key == GLUT_KEY_DOWN:
                 CONSTS.camLat = glm.clamp(CONSTS.camLat - CONSTS.inc_ang, -89, 89)
             elif key == GLUT_KEY_UP:
                 CONSTS.camLat = glm.clamp(CONSTS.camLat + CONSTS.inc_ang, -89, 89)
-            # print(CONSTS.camLat, CONSTS.camLong)
          
     def tecladoEspecialUp(self, key, x, y):
         if (key == GLUT_KEY_DOWN or key == GLUT_KEY_UP) and self.tela == "inicial":
