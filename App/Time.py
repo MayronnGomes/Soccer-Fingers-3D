@@ -23,9 +23,7 @@ class Time:
         for i in self.jogadores:
             colisao_jogador = i.verifica_colisao(bola)
 
-            if colisao_jogador and i != CONSTS.colisao:
-                colisao = i
+            if colisao_jogador:
                 return True
             
-        CONSTS.colisao = None
         return False
