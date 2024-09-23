@@ -22,7 +22,7 @@ class Game:
         glutCreateWindow('FullScreen')
         self.inicio()
         glutTimerFunc(int(1000/CONSTS.FPS), self.timer, 0)      
-        # glutFullScreen()
+        glutFullScreen()
         glutKeyboardFunc(self.tecladoASCII)
         glutSpecialFunc(self.tecladoEspecial)
         glutSpecialUpFunc(self.tecladoEspecialUp)
