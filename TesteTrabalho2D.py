@@ -1,96 +1,90 @@
-import numpy as np
-import OpenGL.GL as gl
-import OpenGL.GLUT as glut
-import OpenGL.GLU as glu
+from PIL import Image
+from OpenGL.GL import *
+from OpenGL.GLUT import *
+from OpenGL.GLU import *
 
-# Configurações iniciais
-width, height = 800, 600
+# Variáveis globais para o GIF e as texturas
+gif = None
+textures = []
+current_frame = 0
 
-def setup():
-    gl.glClearColor(0.0, 0.0, 0.0, 1.0)
-    gl.glEnable(gl.GL_DEPTH_TEST)
-    gl.glMatrixMode(gl.GL_PROJECTION)
-    gl.glLoadIdentity()
-    glu.gluPerspective(45, width / height, 0.1, 100.0)
-    gl.glMatrixMode(gl.GL_MODELVIEW)
-    gl.glLoadIdentity()
+def load_gif(filename):
+    global gif, textures
 
-def draw_cube():
-    gl.glBegin(gl.GL_QUADS)
+    # Carregar o GIF usando Pillow
+    gif = Image.open(filename)
     
-    # Front Face
-    gl.glColor3f(1.0, 0.0, 0.0)
-    gl.glVertex3f(-1.0, -1.0,  1.0)
-    gl.glVertex3f( 1.0, -1.0,  1.0)
-    gl.glVertex3f( 1.0,  1.0,  1.0)
-    gl.glVertex3f(-1.0,  1.0,  1.0)
-    
-    # Back Face
-    gl.glColor3f(0.0, 1.0, 0.0)
-    gl.glVertex3f(-1.0, -1.0, -1.0)
-    gl.glVertex3f(-1.0,  1.0, -1.0)
-    gl.glVertex3f( 1.0,  1.0, -1.0)
-    gl.glVertex3f( 1.0, -1.0, -1.0)
-    
-    # Top Face
-    gl.glColor3f(0.0, 0.0, 1.0)
-    gl.glVertex3f(-1.0,  1.0, -1.0)
-    gl.glVertex3f(-1.0,  1.0,  1.0)
-    gl.glVertex3f( 1.0,  1.0,  1.0)
-    gl.glVertex3f( 1.0,  1.0, -1.0)
-    
-    # Bottom Face
-    gl.glColor3f(1.0, 1.0, 0.0)
-    gl.glVertex3f(-1.0, -1.0, -1.0)
-    gl.glVertex3f( 1.0, -1.0, -1.0)
-    gl.glVertex3f( 1.0, -1.0,  1.0)
-    gl.glVertex3f(-1.0, -1.0,  1.0)
-    
-    # Right face
-    gl.glColor3f(1.0, 0.0, 1.0)
-    gl.glVertex3f( 1.0, -1.0, -1.0)
-    gl.glVertex3f( 1.0,  1.0, -1.0)
-    gl.glVertex3f( 1.0,  1.0,  1.0)
-    gl.glVertex3f( 1.0, -1.0,  1.0)
-    
-    # Left Face
-    gl.glColor3f(0.0, 1.0, 1.0)
-    gl.glVertex3f(-1.0, -1.0, -1.0)
-    gl.glVertex3f(-1.0, -1.0,  1.0)
-    gl.glVertex3f(-1.0,  1.0,  1.0)
-    gl.glVertex3f(-1.0,  1.0, -1.0)
-    
-    gl.glEnd()
+    # Criar texturas para cada frame do GIF
+    for frame in range(gif.n_frames):
+        gif.seek(frame)
+        image_data = gif.convert("RGBA").tobytes()  # Converter para formato RGBA
+        width, height = gif.size
+
+        # Gerar uma textura OpenGL
+        texture = glGenTextures(1)
+        glBindTexture(GL_TEXTURE_2D, texture)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+
+        # Adicionar a textura à lista
+        textures.append(texture)
+
+def init():
+    glEnable(GL_TEXTURE_2D)
+    glClearColor(0.0, 0.0, 0.0, 1.0)
 
 def display():
-    gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
-    gl.glLoadIdentity()
-    glu.gluLookAt(0.0, 0.0, 5.0,  0.0, 0.0, 0.0,  0.0, 1.0, 0.0)
+    global current_frame
 
-    # Draw the cube
-    draw_cube()
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    
+    # Selecionar a textura do frame atual
+    glBindTexture(GL_TEXTURE_2D, textures[current_frame])
 
-    glut.glutSwapBuffers()
+    # Desenhar um quadrado texturizado
+    glBegin(GL_QUADS)
+    glTexCoord2f(0.0, 0.0)
+    glVertex2f(-1.0, -1.0)
+    glTexCoord2f(1.0, 0.0)
+    glVertex2f(1.0, -1.0)
+    glTexCoord2f(1.0, 1.0)
+    glVertex2f(1.0, 1.0)
+    glTexCoord2f(0.0, 1.0)
+    glVertex2f(-1.0, 1.0)
+    glEnd()
+
+    glutSwapBuffers()
+
+    # Atualizar o frame atual para animação
+    current_frame = (current_frame + 1) % len(textures)
 
 def reshape(width, height):
-    gl.glViewport(0, 0, width, height)
-    gl.glMatrixMode(gl.GL_PROJECTION)
-    gl.glLoadIdentity()
-    glu.gluPerspective(45, width / height, 0.1, 100.0)
-    gl.glMatrixMode(gl.GL_MODELVIEW)
+    glViewport(0, 0, width, height)
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    gluOrtho2D(-1.0, 1.0, -1.0, 1.0)
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
+
+def timer(value):
+    glutPostRedisplay()
+    glutTimerFunc(100, timer, 0)  # Controlar a velocidade de atualização dos frames
 
 def main():
-    glut.glutInit()
-    glut.glutInitDisplayMode(glut.GLUT_DOUBLE | glut.GLUT_RGB | glut.GLUT_DEPTH)
-    glut.glutInitWindowSize(width, height)
-    glut.glutCreateWindow(b'OpenGL Clipping Example')
-    
-    setup()
-    
-    glut.glutDisplayFunc(display)
-    glut.glutReshapeFunc(reshape)
-    
-    glut.glutMainLoop()
+    glutInit()
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB)
+    glutInitWindowSize(500, 500)
+    glutCreateWindow(b"GIF Animation with OpenGL")
+
+    init()
+    load_gif("exemplo.gif")  # Substitua pelo seu arquivo GIF
+
+    glutDisplayFunc(display)
+    glutReshapeFunc(reshape)
+    glutTimerFunc(100, timer, 0)
+
+    glutMainLoop()
 
 if __name__ == "__main__":
     main()

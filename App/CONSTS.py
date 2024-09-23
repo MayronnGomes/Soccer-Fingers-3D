@@ -9,6 +9,7 @@ from OpenGL.GLU import *
 from PIL import Image
 
 FPS = 30
+frame = 0
 divisaoCilindro = 15
 camLat = 25
 camLong = 180
@@ -23,6 +24,7 @@ janelaAlt = 540
 dir = glm.vec3(0, bolaRaio, 0)
 lat = glm.vec3(bolaRaio, 0, 0)
 texCampo   = 0 
+texLogo   = 0 
 mov = False
 forca = glm.vec3(0.0, 0.0, 0.0)
 deslocamento = glm.vec3(0.0, 0.0, 0.0)
@@ -73,7 +75,7 @@ FORMATION = {
 TELAS = {"inicial": 0,
          "times": 0,
          "formação1": 0,
-         "formação2": 0#,
-        #  "gol": 0,
-        #  "vencedor": 0
+         "formação2": 0,
+         "vencedor1": [],
+         "vencedor2": []
 }

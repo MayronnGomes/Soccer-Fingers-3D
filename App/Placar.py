@@ -91,7 +91,9 @@ class Placar:
         glColor(1, 1, 1)
         glTranslatef(-1, 9.1, 0.04)
         glScalef(2, 2, 1)
+        glBindTexture(GL_TEXTURE_2D, CONSTS.texLogo)
         cubo.desenha(True)
+        glBindTexture(GL_TEXTURE_2D, 0)
         glPopMatrix()
 
         glPushMatrix() #desenha o placar esq
