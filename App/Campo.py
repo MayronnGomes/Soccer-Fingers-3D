@@ -48,40 +48,40 @@ class Campo:
         glPopMatrix()
 
     def verifica_colisao(self, bola):
-        if (bola.pos.y + CONSTS.bolaRaio/2 >= CONSTS.campoAlt/2) and (CONSTS.forca.y > 0):        # A POSITIVO
+        if (bola.pos.y + CONSTS.bolaDiametro/2 >= CONSTS.campoAlt/2) and (CONSTS.forca.y > 0):        # A POSITIVO
             CONSTS.normal = glm.vec3(0, 1, 0)
             return True
-        elif (bola.pos.y - CONSTS.bolaRaio/2 <= -CONSTS.campoAlt/2) and (CONSTS.forca.y < 0):     # A NEGATIVO
+        elif (bola.pos.y - CONSTS.bolaDiametro/2 <= -CONSTS.campoAlt/2) and (CONSTS.forca.y < 0):     # A NEGATIVO
             CONSTS.normal = glm.vec3(0, 1, 0)
             return True
-        elif (bola.pos.x + CONSTS.bolaRaio/2 >= CONSTS.campoLar/2 + 2) and (CONSTS.forca.x > 0):  # B POSITIVO
+        elif (bola.pos.x + CONSTS.bolaDiametro/2 >= CONSTS.campoLar/2 + 2) and (CONSTS.forca.x > 0):  # B POSITIVO
             CONSTS.normal = glm.vec3(1, 0, 0)
             return True
-        elif (bola.pos.x - CONSTS.bolaRaio/2 <= -CONSTS.campoLar/2 - 2) and (CONSTS.forca.x < 0): # B NEGATIVO
+        elif (bola.pos.x - CONSTS.bolaDiametro/2 <= -CONSTS.campoLar/2 - 2) and (CONSTS.forca.x < 0): # B NEGATIVO
             CONSTS.normal = glm.vec3(1, 0, 0)
             return True
-        elif (bola.pos.x + CONSTS.bolaRaio/2 > CONSTS.campoLar/2) and (bola.pos.y + CONSTS.bolaRaio/2 >= 2.4) and (bola.pos.y + CONSTS.bolaRaio/2 - CONSTS.forca.y < 2.4) and (CONSTS.forca.y > 0):     # E POSITIVO
+        elif (bola.pos.x + CONSTS.bolaDiametro/2 > CONSTS.campoLar/2) and (bola.pos.y + CONSTS.bolaDiametro/2 >= 2.4) and (bola.pos.y + CONSTS.bolaDiametro/2 - CONSTS.forca.y < 2.4) and (CONSTS.forca.y > 0):     # E POSITIVO
             CONSTS.normal = glm.vec3(0, 1, 0)
             return True
-        elif (bola.pos.x - CONSTS.bolaRaio/2 < -CONSTS.campoLar/2) and (bola.pos.y + CONSTS.bolaRaio/2 >= 2.4) and (bola.pos.y + CONSTS.bolaRaio/2 - CONSTS.forca.y < 2.4) and (CONSTS.forca.y > 0):    # E NEGATIVO
+        elif (bola.pos.x - CONSTS.bolaDiametro/2 < -CONSTS.campoLar/2) and (bola.pos.y + CONSTS.bolaDiametro/2 >= 2.4) and (bola.pos.y + CONSTS.bolaDiametro/2 - CONSTS.forca.y < 2.4) and (CONSTS.forca.y > 0):    # E NEGATIVO
             CONSTS.normal = glm.vec3(0, 1, 0)
             return True
-        elif (bola.pos.x + CONSTS.bolaRaio/2 >= CONSTS.campoLar/2) and (bola.pos.y + CONSTS.bolaRaio/2 >= 2.4) and (CONSTS.forca.x > 0):    # C POSITIVO
+        elif (bola.pos.x + CONSTS.bolaDiametro/2 >= CONSTS.campoLar/2) and (bola.pos.y + CONSTS.bolaDiametro/2 >= 2.4) and (CONSTS.forca.x > 0):    # C POSITIVO
             CONSTS.normal = glm.vec3(1, 0, 0)
             return True
-        elif (bola.pos.x - CONSTS.bolaRaio/2 <= -CONSTS.campoLar/2) and (bola.pos.y + CONSTS.bolaRaio/2 >= 2.4) and (CONSTS.forca.x < 0):   # C NEGATIVO
+        elif (bola.pos.x - CONSTS.bolaDiametro/2 <= -CONSTS.campoLar/2) and (bola.pos.y + CONSTS.bolaDiametro/2 >= 2.4) and (CONSTS.forca.x < 0):   # C NEGATIVO
             CONSTS.normal = glm.vec3(1, 0, 0)
             return True
-        elif (bola.pos.x + CONSTS.bolaRaio/2 > CONSTS.campoLar/2) and (bola.pos.y - CONSTS.bolaRaio/2 <= -2.4) and (bola.pos.y - CONSTS.bolaRaio/2 - CONSTS.forca.y > -2.4) and (CONSTS.forca.y < 0):    # F POSITIVO
+        elif (bola.pos.x + CONSTS.bolaDiametro/2 > CONSTS.campoLar/2) and (bola.pos.y - CONSTS.bolaDiametro/2 <= -2.4) and (bola.pos.y - CONSTS.bolaDiametro/2 - CONSTS.forca.y > -2.4) and (CONSTS.forca.y < 0):    # F POSITIVO
             CONSTS.normal = glm.vec3(0, 1, 0)
             return True
-        elif (bola.pos.x - CONSTS.bolaRaio/2 < -CONSTS.campoLar/2) and (bola.pos.y - CONSTS.bolaRaio/2 <= -2.4) and (bola.pos.y - CONSTS.bolaRaio/2 - CONSTS.forca.y > -2.4) and (CONSTS.forca.y < 0):   # F NEGATIVO
+        elif (bola.pos.x - CONSTS.bolaDiametro/2 < -CONSTS.campoLar/2) and (bola.pos.y - CONSTS.bolaDiametro/2 <= -2.4) and (bola.pos.y - CONSTS.bolaDiametro/2 - CONSTS.forca.y > -2.4) and (CONSTS.forca.y < 0):   # F NEGATIVO
             CONSTS.normal = glm.vec3(0, 1, 0)
             return True
-        elif (bola.pos.x + CONSTS.bolaRaio/2 >= CONSTS.campoLar/2) and (bola.pos.y - CONSTS.bolaRaio/2 <= -2.4) and (CONSTS.forca.x > 0):   # D POSITIVO
+        elif (bola.pos.x + CONSTS.bolaDiametro/2 >= CONSTS.campoLar/2) and (bola.pos.y - CONSTS.bolaDiametro/2 <= -2.4) and (CONSTS.forca.x > 0):   # D POSITIVO
             CONSTS.normal = glm.vec3(1, 0, 0)
             return True
-        elif (bola.pos.x - CONSTS.bolaRaio/2 <= -CONSTS.campoLar/2) and (bola.pos.y - CONSTS.bolaRaio/2 <= -2.4) and (CONSTS.forca.x < 0):  # D NEGATIVO
+        elif (bola.pos.x - CONSTS.bolaDiametro/2 <= -CONSTS.campoLar/2) and (bola.pos.y - CONSTS.bolaDiametro/2 <= -2.4) and (CONSTS.forca.x < 0):  # D NEGATIVO
             CONSTS.normal = glm.vec3(1, 0, 0)
             return True
         else:
@@ -89,10 +89,10 @@ class Campo:
             return False
         
     def colisao_gol(self, bola, placar):
-        if (bola.pos.x - CONSTS.bolaRaio/2 > 15) and (abs(bola.pos.y) + CONSTS.bolaRaio/2 <= 2.4): # gol direito
+        if (bola.pos.x - CONSTS.bolaDiametro/2 > 15) and (abs(bola.pos.y) + CONSTS.bolaDiametro/2 <= 2.4): # gol direito
             placar.score1 += 1
             return True
-        elif (bola.pos.x + CONSTS.bolaRaio/2 < -15) and (abs(bola.pos.y) + CONSTS.bolaRaio/2 <= 2.4): # gol esquerdo
+        elif (bola.pos.x + CONSTS.bolaDiametro/2 < -15) and (abs(bola.pos.y) + CONSTS.bolaDiametro/2 <= 2.4): # gol esquerdo
             placar.score2 += 1
             return True
         else:

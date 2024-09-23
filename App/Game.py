@@ -57,7 +57,7 @@ class Game:
                 load_gif(i)
 
         self.campo = Campo(CONSTS.campoLar, CONSTS.campoAlt)
-        self.bola = Bola(CONSTS.bolaRaio)
+        self.bola = Bola(CONSTS.bolaDiametro)
         self.formation = Formation()
         self.nomeA = ''
         self.nomeB = ''
@@ -256,12 +256,12 @@ class Game:
                     self.timeA.alterarFormacao()
                     self.timeB.alterarFormacao()
 
-                    if self.placar.score1 == 1:
+                    if self.placar.score1 == 5:
                         self.tela = "vencedor1"
-                    elif self.placar.score2 == 1:
+                    elif self.placar.score2 == 5:
                         self.tela = "vencedor2"
                 
-                print('Movimento parou')
+                # Movimento parou
                 self.gameover()
 
             # tratamento de colisão e movimento da bola
@@ -273,9 +273,9 @@ class Game:
                     self.timeA.alterarFormacao()
                     self.timeB.alterarFormacao()
 
-                    if self.placar.score1 == 1:
+                    if self.placar.score1 == 5:
                         self.tela = "vencedor1"
-                    elif self.placar.score2 == 1:
+                    elif self.placar.score2 == 5:
                         self.tela = "vencedor2"
 
                 elif self.campo.verifica_colisao(self.bola): # colisão no campo
@@ -387,9 +387,9 @@ class Game:
                 else:
                     CONSTS.camLong += CONSTS.inc_ang
             elif key == GLUT_KEY_DOWN:
-                CONSTS.camLat = glm.clamp(CONSTS.camLat - CONSTS.inc_ang, -89, 89)
+                CONSTS.camLat = glm.clamp(CONSTS.camLat - CONSTS.inc_ang, 7, 89)
             elif key == GLUT_KEY_UP:
-                CONSTS.camLat = glm.clamp(CONSTS.camLat + CONSTS.inc_ang, -89, 89)
+                CONSTS.camLat = glm.clamp(CONSTS.camLat + CONSTS.inc_ang, 7, 89)
          
     def tecladoEspecialUp(self, key, x, y):
         if (key == GLUT_KEY_DOWN or key == GLUT_KEY_UP) and self.tela == "inicial":
