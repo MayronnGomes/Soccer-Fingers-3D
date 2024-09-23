@@ -135,3 +135,24 @@ def shading(point, normal, objeto):
     shade = shadeAmbient + shadeDiffuse + shadeSpecular
 
     return shade
+
+def load_gif(filename):
+    
+    # Carregar o GIF usando Pillow
+    gif = Image.open(f'../Texturas/Telas/{filename}.gif')
+    
+    # Criar texturas para cada frame do GIF
+    for frame in range(gif.n_frames):
+        gif.seek(frame)
+        image_data = gif.convert("RGBA").tobytes()  # Converter para formato RGBA
+        width, height = gif.size
+
+        # Gerar uma textura OpenGL
+        texture = glGenTextures(1)
+        glBindTexture(GL_TEXTURE_2D, texture)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+
+        # Adicionar a textura à lista
+        CONSTS.TELAS[filename].append(texture)

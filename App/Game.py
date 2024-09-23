@@ -41,6 +41,7 @@ class Game:
         glDepthFunc(GL_LEQUAL)                  
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         CONSTS.texCampo = carregaTextura('../Texturas/campo.jpg')
+        CONSTS.texLogo = carregaTextura('../Texturas/logo.png')
 
         for i in CONSTS.TIME:
             CONSTS.TIME[i] = carregaTextura(f'../Texturas/TIMES PNG/{i}.png')
@@ -50,7 +51,10 @@ class Game:
             CONSTS.PLACAR[f'{i}'] = carregaTextura(f'../Texturas/Placar/{i}.png')
         
         for i in CONSTS.TELAS.keys():
-            CONSTS.TELAS[i] = carregaTextura(f'../Texturas/Telas/{i}.png')        
+            if i != "vencedor1" and i != "vencedor2":
+                CONSTS.TELAS[i] = carregaTextura(f'../Texturas/Telas/{i}.png') 
+            else:
+                load_gif(i)
 
         self.campo = Campo(CONSTS.campoLar, CONSTS.campoAlt)
         self.bola = Bola(CONSTS.bolaRaio)
@@ -215,7 +219,22 @@ class Game:
             elif self.tela == "formação1" or self.tela == "formação2":
                 self.formation.desenha(self.tela)
 
+            elif self.tela == "vencedor1" or self.tela == "vencedor2":
+                cube = Cube()
+
+                glPushMatrix()
+                glScalef(1, -1, 1)
+                glTranslatef(-CONSTS.mundoLar, -CONSTS.mundoAlt, 0)
+                glScalef(2 * CONSTS.mundoLar, 2 * CONSTS.mundoAlt, 1)
+                glBindTexture(GL_TEXTURE_2D, CONSTS.TELAS[self.tela][CONSTS.frame])
+                cube.desenha(True)
+                glBindTexture(GL_TEXTURE_2D, 0)
+                glPopMatrix()
+
         glutSwapBuffers()
+
+        if self.tela == "vencedor1" or self.tela == "vencedor2":
+            CONSTS.frame = (CONSTS.frame + 1) % len(CONSTS.TELAS[self.tela])
 
     def reshape(self, w, h):
         CONSTS.janelaLar = w
@@ -237,9 +256,10 @@ class Game:
                     self.timeA.alterarFormacao()
                     self.timeB.alterarFormacao()
 
-                    if self.vencedor(self.placar):
-                        # self.desenha(winner) # desenha uma mensagem de vencedor
-                        print(f'vencedor {CONSTS.winner}') 
+                    if self.placar.score1 == 1:
+                        self.tela = "vencedor1"
+                    elif self.placar.score2 == 1:
+                        self.tela = "vencedor2"
                 
                 print('Movimento parou')
                 self.gameover()
@@ -253,9 +273,10 @@ class Game:
                     self.timeA.alterarFormacao()
                     self.timeB.alterarFormacao()
 
-                    if self.vencedor(self.placar):
-                        # self.desenha(winner) # desenha uma mensagem de vencedor
-                        print(f'vencedor {CONSTS.winner}') 
+                    if self.placar.score1 == 1:
+                        self.tela = "vencedor1"
+                    elif self.placar.score2 == 1:
+                        self.tela = "vencedor2"
 
                 elif self.campo.verifica_colisao(self.bola): # colisão no campo
                     recalcMov(CONSTS.normal)
@@ -300,6 +321,19 @@ class Game:
                 CONSTS.forca.z = 0
                 CONSTS.velocidade = glm.normalize(CONSTS.forca) * 0.2
                 CONSTS.mov = True
+            elif self.tela == "vencedor1" or self.tela == "vencedor2":
+                self.nomeA = ''
+                self.nomeB = ''
+                self.timeA = None
+                self.timeB = None
+                self.placar = None
+                self.option = 3
+                self.optionTimeA = 0
+                self.optionTimeB = 0
+                CONSTS.camLat = 25
+                CONSTS.camLong = 180
+                CONSTS.frame = 0
+                self.tela = "times"
         elif key.lower() == b'f' and self.tela == "jogo":
             self.tela = "formação1"
             glutPostRedisplay()
@@ -364,16 +398,6 @@ class Game:
             glutPostRedisplay()
         elif (key == GLUT_KEY_RIGHT or key == GLUT_KEY_LEFT or key == GLUT_KEY_DOWN or key == GLUT_KEY_UP) and (self.tela == "formação1" or self.tela == "formação2"):
             glutPostRedisplay()
-
-    def vencedor(self, placar):
-        if placar.score1 == 5:
-            CONSTS.winner = placar.time1
-            return True
-        elif placar.score2 == 5:
-            CONSTS.winner = placar.time2
-            return True
-        else:
-            return False
 
     def gameover(self):
 
