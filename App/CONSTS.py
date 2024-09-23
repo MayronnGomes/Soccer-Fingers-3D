@@ -33,7 +33,6 @@ t = 0.1
 velocidade = glm.vec3(0.0, 0.0, 0.0)
 winner = ""
 normal = glm.vec3(0, 0, 0)
-colisao = None
 cameraPosition = None
 lightAmbient = glm.vec3(0.1)    # Ia
 surfaceAmbient = glm.vec3(0.1)  # Ka   
