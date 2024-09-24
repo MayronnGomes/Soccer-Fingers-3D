@@ -43,16 +43,6 @@ class Bola:
 
     def move(self):
 
-        # self.pos += CONSTS.t * CONSTS.forca
-        # print(f'pos {self.pos}')
-        # print(f'forca {CONSTS.forca}')
-        # print(f'deslocamento {CONSTS.deslocamento}')
-        # print()
-        # CONSTS.deslocamento += CONSTS.t * CONSTS.forca
-
-        # if CONSTS.deslocamento.x >= CONSTS.forca.x * 3/4:
-        #     CONSTS.t = max(0.3, CONSTS.t - CONSTS.aceleracao)
-
         self.pos.x += CONSTS.velocidade.x
         self.pos.y += CONSTS.velocidade.y
 

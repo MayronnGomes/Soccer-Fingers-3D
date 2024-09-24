@@ -43,6 +43,9 @@ class Game:
         CONSTS.texCampo = carregaTextura('../Texturas/campo.jpg')
         CONSTS.texLogo = carregaTextura('../Texturas/logo.png')
 
+        for i in range(1, 6):
+            CONSTS.texBar.append(carregaTextura(f'../Texturas/Barra/{i}.png'))
+
         for i in CONSTS.TIME:
             CONSTS.TIME[i] = carregaTextura(f'../Texturas/TIMES PNG/{i}.png')
             CONSTS.SIGLAS[i] = carregaTextura(f'../Texturas/Siglas/{i}.png')
@@ -120,6 +123,15 @@ class Game:
 
             glPushMatrix()
             self.placar.desenha()
+            glPopMatrix()
+
+            glPushMatrix()
+            cube = Cube()
+            glTranslatef(-CONSTS.mundoLar, -CONSTS.mundoAlt, 0)
+            glScalef(6, 3, 1)
+            glBindTexture(GL_TEXTURE_2D, CONSTS.texBar[CONSTS.currentBar])
+            cube.desenha(True)
+            glBindTexture(GL_TEXTURE_2D, 0)
             glPopMatrix()
 
             glEnable(GL_DEPTH_TEST)
@@ -256,9 +268,9 @@ class Game:
                     self.timeA.alterarFormacao()
                     self.timeB.alterarFormacao()
 
-                    if self.placar.score1 == 5:
+                    if self.placar.score1 == 1:
                         self.tela = "vencedor1"
-                    elif self.placar.score2 == 5:
+                    elif self.placar.score2 == 1:
                         self.tela = "vencedor2"
                 
                 # Movimento parou
@@ -273,9 +285,9 @@ class Game:
                     self.timeA.alterarFormacao()
                     self.timeB.alterarFormacao()
 
-                    if self.placar.score1 == 5:
+                    if self.placar.score1 == 1:
                         self.tela = "vencedor1"
-                    elif self.placar.score2 == 5:
+                    elif self.placar.score2 == 1:
                         self.tela = "vencedor2"
 
                 elif self.campo.verifica_colisao(self.bola): # colisão no campo
@@ -319,7 +331,8 @@ class Game:
                 CONSTS.forca.x = round(CONSTS.forca.x, 3)
                 CONSTS.forca.y = round(CONSTS.forca.y, 3)
                 CONSTS.forca.z = 0
-                CONSTS.velocidade = glm.normalize(CONSTS.forca) * 0.2
+                forcaBar()
+                CONSTS.velocidade = glm.normalize(CONSTS.forca) * 0.3
                 CONSTS.mov = True
             elif self.tela == "vencedor1" or self.tela == "vencedor2":
                 self.nomeA = ''
@@ -333,6 +346,7 @@ class Game:
                 CONSTS.camLat = 25
                 CONSTS.camLong = 180
                 CONSTS.frame = 0
+                CONSTS.currentBar = 0
                 self.tela = "times"
         elif key.lower() == b'f' and self.tela == "jogo":
             self.tela = "formação1"
@@ -344,6 +358,10 @@ class Game:
             elif self.tela == "formação2":
                 self.tela = "jogo"
                 glutPostRedisplay()
+        elif key.lower() == b's' and self.tela == "jogo":
+            CONSTS.camLat = glm.clamp(CONSTS.camLat - CONSTS.inc_ang, 7, 89)
+        elif key.lower() == b'w' and self.tela == "jogo":
+            CONSTS.camLat = glm.clamp(CONSTS.camLat + CONSTS.inc_ang, 7, 89)
 
     def tecladoEspecial(self, key, x, y):
         if self.tela == "inicial":
@@ -387,10 +405,10 @@ class Game:
                 else:
                     CONSTS.camLong += CONSTS.inc_ang
             elif key == GLUT_KEY_DOWN:
-                CONSTS.camLat = glm.clamp(CONSTS.camLat - CONSTS.inc_ang, 7, 89)
+                CONSTS.currentBar = glm.clamp(CONSTS.currentBar - 1, 0, 4)
             elif key == GLUT_KEY_UP:
-                CONSTS.camLat = glm.clamp(CONSTS.camLat + CONSTS.inc_ang, 7, 89)
-         
+                CONSTS.currentBar = glm.clamp(CONSTS.currentBar + 1, 0, 4)
+        
     def tecladoEspecialUp(self, key, x, y):
         if (key == GLUT_KEY_DOWN or key == GLUT_KEY_UP) and self.tela == "inicial":
             glutPostRedisplay()
