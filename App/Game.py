@@ -1,5 +1,4 @@
 import CONSTS
-import math
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
@@ -54,7 +53,7 @@ class Game:
             CONSTS.PLACAR[f'{i}'] = carregaTextura(f'../Texturas/Placar/{i}.png')
         
         for i in CONSTS.TELAS.keys():
-            if i != "vencedor1" and i != "vencedor2":
+            if i != "vencedor1" and i != "vencedor2" and i != "gol":
                 CONSTS.TELAS[i] = carregaTextura(f'../Texturas/Telas/{i}.png') 
             else:
                 load_gif(i)
@@ -231,7 +230,7 @@ class Game:
             elif self.tela == "formação1" or self.tela == "formação2":
                 self.formation.desenha(self.tela)
 
-            elif self.tela == "vencedor1" or self.tela == "vencedor2":
+            elif self.tela == "vencedor1" or self.tela == "vencedor2" or self.tela == "gol":
                 cube = Cube()
 
                 glPushMatrix()
@@ -245,7 +244,7 @@ class Game:
 
         glutSwapBuffers()
 
-        if self.tela == "vencedor1" or self.tela == "vencedor2":
+        if self.tela == "vencedor1" or self.tela == "vencedor2" or self.tela == "gol":
             CONSTS.frame = (CONSTS.frame + 1) % len(CONSTS.TELAS[self.tela])
 
     def reshape(self, w, h):
@@ -268,10 +267,12 @@ class Game:
                     self.timeA.alterarFormacao()
                     self.timeB.alterarFormacao()
 
-                    if self.placar.score1 == 1:
+                    if self.placar.score1 == 5:
                         self.tela = "vencedor1"
-                    elif self.placar.score2 == 1:
+                    elif self.placar.score2 == 5:
                         self.tela = "vencedor2"
+                    else:
+                        self.tela = "gol"
                 
                 # Movimento parou
                 self.gameover()
@@ -285,10 +286,12 @@ class Game:
                     self.timeA.alterarFormacao()
                     self.timeB.alterarFormacao()
 
-                    if self.placar.score1 == 1:
+                    if self.placar.score1 == 5:
                         self.tela = "vencedor1"
-                    elif self.placar.score2 == 1:
+                    elif self.placar.score2 == 5:
                         self.tela = "vencedor2"
+                    else:
+                        self.tela = "gol"
 
                 elif self.campo.verifica_colisao(self.bola): # colisão no campo
                     recalcMov(CONSTS.normal)
@@ -348,6 +351,12 @@ class Game:
                 CONSTS.frame = 0
                 CONSTS.currentBar = 0
                 self.tela = "times"
+            elif self.tela == "gol":
+                CONSTS.camLat = 25
+                CONSTS.camLong = 180
+                CONSTS.frame = 0
+                CONSTS.currentBar = 0
+                self.tela = "jogo"
         elif key.lower() == b'f' and self.tela == "jogo":
             self.tela = "formação1"
             glutPostRedisplay()
