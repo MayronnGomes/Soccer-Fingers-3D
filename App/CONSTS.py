@@ -76,5 +76,6 @@ TELAS = {"inicial": 0,
          "formação1": 0,
          "formação2": 0,
          "vencedor1": [],
-         "vencedor2": []
+         "vencedor2": [],
+         "gol": []
 }
