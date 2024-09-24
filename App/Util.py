@@ -4,13 +4,15 @@ import CONSTS
 from PIL import Image
 from OpenGL.GL import *
 
+def forcaBar():
+    CONSTS.forca *= CONSTS.multForca[CONSTS.currentBar]
+
 def recalcMov(normal):
 
     CONSTS.forca = glm.reflect(CONSTS.forca, normal)
     CONSTS.deslocamento = glm.reflect(CONSTS.deslocamento, normal)
     CONSTS.velocidade = glm.reflect(CONSTS.velocidade, normal)
 
-    # fazer Barra de força multiplicadores 1, 1.25, 1.5, 1.75, 2
 
 def carregaTextura(filename):
     # carregamento da textura feita pelo módulo PIL

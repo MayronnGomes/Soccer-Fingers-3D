@@ -25,19 +25,19 @@ dir = glm.vec3(0, bolaDiametro, 0)
 lat = glm.vec3(bolaDiametro, 0, 0)
 texCampo   = 0 
 texLogo   = 0 
+texBar = []
+currentBar = 0
+multForca = [0.5, 1, 1.5, 2, 2.5]
 mov = False
 forca = glm.vec3(0.0, 0.0, 0.0)
 deslocamento = glm.vec3(0.0, 0.0, 0.0)
-aceleracao = 0.05
-t = 0.1
 velocidade = glm.vec3(0.0, 0.0, 0.0)
 winner = ""
 normal = glm.vec3(0, 0, 0)
 cameraPosition = None
 lightAmbient = glm.vec3(0.1)    # Ia
 surfaceAmbient = glm.vec3(0.1)  # Ka   
-lightPosition = glm.vec3(0, 0, 30)
-
+lightPosition = glm.vec3(-10, 0, 10)
 SIGLAS = {}
 
 PLACAR = {}
