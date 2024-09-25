@@ -37,7 +37,7 @@ normal = glm.vec3(0, 0, 0)
 cameraPosition = None
 lightAmbient = glm.vec3(0.1)    # Ia
 surfaceAmbient = glm.vec3(0.1)  # Ka   
-lightPosition = glm.vec3(-10, 0, 10)
+lightPosition = glm.vec3(0, 0, 10)
 SIGLAS = {}
 
 PLACAR = {}
