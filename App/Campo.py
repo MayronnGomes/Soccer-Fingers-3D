@@ -59,14 +59,12 @@ class Campo:
             CONSTS.normal = glm.vec3(1, 0, 0)
             return True
         elif (bola.pos.x + CONSTS.bolaDiametro/2 > CONSTS.campoLar/2) and (bola.pos.y + CONSTS.bolaDiametro/2 >= 2.4) and (bola.pos.y + CONSTS.bolaDiametro/2 - CONSTS.velocidade.y < 2.4) and (CONSTS.velocidade.y > 0):     # E POSITIVO
-            print("E+")
             CONSTS.normal = glm.vec3(0, 1, 0)
             return True
         elif (bola.pos.x - CONSTS.bolaDiametro/2 < -CONSTS.campoLar/2) and (bola.pos.y + CONSTS.bolaDiametro/2 >= 2.4) and (bola.pos.y + CONSTS.bolaDiametro/2 - CONSTS.velocidade.y < 2.4) and (CONSTS.velocidade.y > 0):    # E NEGATIVO
             CONSTS.normal = glm.vec3(0, 1, 0)
             return True
         elif (bola.pos.x + CONSTS.bolaDiametro/2 >= CONSTS.campoLar/2) and (bola.pos.y + CONSTS.bolaDiametro/2 >= 2.4) and (CONSTS.velocidade.x > 0):    # C POSITIVO
-            print("C+")
             CONSTS.normal = glm.vec3(1, 0, 0)
             return True
         elif (bola.pos.x - CONSTS.bolaDiametro/2 <= -CONSTS.campoLar/2) and (bola.pos.y + CONSTS.bolaDiametro/2 >= 2.4) and (CONSTS.velocidade.x < 0):   # C NEGATIVO

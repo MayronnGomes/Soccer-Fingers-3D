@@ -1,5 +1,6 @@
 import pygame
 import CONSTS
+import time
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
@@ -40,6 +41,7 @@ class Game:
         glEnable(GL_BLEND);       
         glDepthFunc(GL_LEQUAL)                  
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
         pygame.mixer.init()
         CONSTS.somChute = pygame.mixer.Sound('../Sons/chute.wav')
         CONSTS.somChute.set_volume(1)
@@ -49,6 +51,11 @@ class Game:
         CONSTS.somSelecionar.set_volume(1)
         CONSTS.somOpcao = pygame.mixer.Sound('../Sons/opcao.mp3')
         CONSTS.somOpcao.set_volume(1)
+        CONSTS.somApito = pygame.mixer.Sound('../Sons/apito.wav')
+        CONSTS.somApito.set_volume(1)
+        CONSTS.somGol = pygame.mixer.Sound('../Sons/gol.mp3')
+        CONSTS.somGol.set_volume(1)
+
         CONSTS.texCampo = carregaTextura('../Texturas/campo.jpg')
         CONSTS.texLogo = carregaTextura('../Texturas/logo.png')
 
@@ -279,10 +286,15 @@ class Game:
                     self.timeB.alterarFormacao()
 
                     if self.placar.score1 == 5:
+                        CONSTS.somApito.play()
+                        time.sleep(3)
                         self.tela = "vencedor1"
                     elif self.placar.score2 == 5:
+                        CONSTS.somApito.play()
+                        time.sleep(3)
                         self.tela = "vencedor2"
                     else:
+                        CONSTS.somGol.play()
                         self.tela = "gol"
                 
                 # Movimento parou
@@ -298,10 +310,15 @@ class Game:
                     self.timeB.alterarFormacao()
 
                     if self.placar.score1 == 5:
+                        CONSTS.somApito.play()
+                        time.sleep(3)
                         self.tela = "vencedor1"
                     elif self.placar.score2 == 5:
+                        CONSTS.somApito.play()
+                        time.sleep(3)
                         self.tela = "vencedor2"
                     else:
+                        CONSTS.somGol.play()
                         self.tela = "gol"
 
                 elif self.campo.verifica_colisao(self.bola): # colisão no campo
