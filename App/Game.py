@@ -1,3 +1,4 @@
+import pygame
 import CONSTS
 from OpenGL.GL import *
 from OpenGL.GLUT import *
@@ -39,6 +40,15 @@ class Game:
         glEnable(GL_BLEND);       
         glDepthFunc(GL_LEQUAL)                  
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        pygame.mixer.init()
+        CONSTS.somChute = pygame.mixer.Sound('../Sons/chute.wav')
+        CONSTS.somChute.set_volume(1)
+        CONSTS.somVoltar = pygame.mixer.Sound('../Sons/voltar.mp3')
+        CONSTS.somVoltar.set_volume(1)
+        CONSTS.somSelecionar = pygame.mixer.Sound('../Sons/selecionar.mp3')
+        CONSTS.somSelecionar.set_volume(1)
+        CONSTS.somOpcao = pygame.mixer.Sound('../Sons/opcao.mp3')
+        CONSTS.somOpcao.set_volume(1)
         CONSTS.texCampo = carregaTextura('../Texturas/campo.jpg')
         CONSTS.texLogo = carregaTextura('../Texturas/logo.png')
 
@@ -308,14 +318,18 @@ class Game:
     def tecladoASCII(self, key, x, y):
         if key == b'\r':
             if self.tela == "inicial":
+                CONSTS.somSelecionar.play()
                 if self.option == 0:
                     self.tela = "times"
                     self.option = 3
+                    self.optionTimeA = 0
+                    self.optionTimeB = 0
                 elif self.option == 1:
                     print("options")
                 elif self.option == 2:
                     glutLeaveMainLoop()
             elif self.tela == "times":
+                CONSTS.somSelecionar.play()
                 if self.nomeA == "":
                     self.nomeA = CONSTS.OPTIONSTIMES[self.optionTimeA]
                     self.timeA = Time(self.nomeA, CONSTS.FORMATION['1'], False)
@@ -325,12 +339,15 @@ class Game:
                     self.placar = Placar(self.nomeA, self.nomeB)
                     self.tela = "jogo"
             elif self.tela == "formação1":
+                CONSTS.somSelecionar.play()
                 self.timeA.formacao = CONSTS.FORMATION[str(self.formation.option)]
                 self.tela = "formação2"
             elif self.tela == "formação2":
+                CONSTS.somSelecionar.play()
                 self.timeB.formacao = CONSTS.FORMATION[str(self.formation.option)]
                 self.tela = "jogo"
             elif self.tela == "jogo" and not CONSTS.mov:
+                CONSTS.somChute.play()
                 CONSTS.forca =  self.bola.pos - CONSTS.cameraPosition
                 CONSTS.forca.x = round(CONSTS.forca.x, 3)
                 CONSTS.forca.y = round(CONSTS.forca.y, 3)
@@ -340,6 +357,7 @@ class Game:
                 CONSTS.velocidade = glm.normalize(CONSTS.forca) * 0.3
                 CONSTS.mov = True
             elif self.tela == "vencedor1" or self.tela == "vencedor2":
+                CONSTS.somSelecionar.play()
                 self.nomeA = ''
                 self.nomeB = ''
                 self.timeA = None
@@ -366,11 +384,21 @@ class Game:
             glutPostRedisplay()
         elif key.lower() == b'q':
             if self.tela == "formação1":
+                CONSTS.somVoltar.play()
                 self.tela = "formação2"
                 glutPostRedisplay()
             elif self.tela == "formação2":
+                CONSTS.somVoltar.play()
                 self.tela = "jogo"
                 glutPostRedisplay()
+            elif self.tela == "times":
+                CONSTS.somVoltar.play()
+                if self.nomeA == "":
+                    self.option = 0
+                    self.tela = "inicial"
+                else:
+                    self.nomeA = ''
+                    self.timeA = None
         elif key.lower() == b's' and self.tela == "jogo":
             CONSTS.camLat = glm.clamp(CONSTS.camLat - CONSTS.inc_ang, 7, 89)
         elif key.lower() == b'w' and self.tela == "jogo":
@@ -379,28 +407,38 @@ class Game:
     def tecladoEspecial(self, key, x, y):
         if self.tela == "inicial":
             if key == GLUT_KEY_DOWN:
+                CONSTS.somOpcao.play()
                 self.option += 1 if self.option < 2 else 0
             elif key == GLUT_KEY_UP:
+                CONSTS.somOpcao.play()
                 self.option -= 1 if self.option > 0 else 0
         elif self.tela == "times":
             if self.nomeA == "":
                 if key == GLUT_KEY_RIGHT:
+                    CONSTS.somOpcao.play()
                     self.optionTimeA += 1 if self.optionTimeA < (len(CONSTS.OPTIONSTIMES) - 1) else 0
                 elif key == GLUT_KEY_LEFT:
+                    CONSTS.somOpcao.play()
                     self.optionTimeA -= 1 if self.optionTimeA > 0 else 0
             else:
                 if key == GLUT_KEY_RIGHT:
+                    CONSTS.somOpcao.play()
                     self.optionTimeB += 1 if self.optionTimeB < (len(CONSTS.OPTIONSTIMES) - 1) else 0
                 elif key == GLUT_KEY_LEFT:
+                    CONSTS.somOpcao.play()
                     self.optionTimeB -= 1 if self.optionTimeB > 0 else 0
         elif self.tela == "formação1" or self.tela == "formação2":
             if key == GLUT_KEY_RIGHT:
+                CONSTS.somOpcao.play()
                 self.formation.option += 1 if self.formation.option < 8 else 0
             elif key == GLUT_KEY_LEFT:
+                CONSTS.somOpcao.play()
                 self.formation.option -= 1 if self.formation.option > 1 else 0
             elif key == GLUT_KEY_DOWN:
+                CONSTS.somOpcao.play()
                 self.formation.option += 4 if self.formation.option < 5 else 0
             elif key == GLUT_KEY_UP:
+                CONSTS.somOpcao.play()
                 self.formation.option -= 4 if self.formation.option > 4 else 0
         elif self.tela == "jogo":
             if key == GLUT_KEY_RIGHT:

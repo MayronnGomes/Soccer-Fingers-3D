@@ -39,6 +39,13 @@ cameraPosition = None
 lightAmbient = glm.vec3(0.1)    # Ia
 surfaceAmbient = glm.vec3(0.1)  # Ka   
 lightPosition = glm.vec3(0, 0, 10)
+
+# SONS
+somChute = None
+somOpcao = None
+somSelecionar = None
+somVoltar = None
+
 SIGLAS = {}
 
 PLACAR = {}
