@@ -48,3 +48,11 @@ class Bola:
 
         CONSTS.deslocamento.x += CONSTS.velocidade.x
         CONSTS.deslocamento.y += CONSTS.velocidade.y
+
+        if (CONSTS.ang_rot + 10) > 360:
+            CONSTS.ang_rot = 0
+        else:
+            CONSTS.ang_rot += 10
+
+        print(CONSTS.ang_rot)
+            
