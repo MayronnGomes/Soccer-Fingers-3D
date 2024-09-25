@@ -12,7 +12,7 @@ class Jogador:
         self.posicao = posicao
 
     def desenha(self):
-        jogador = Cilindro(self.altura, self.raio, self.time)
+        jogador = Cilindro(self.altura, self.raio, self.time, self.posicao)
         glPushMatrix()
         glTranslatef(self.posicao.x, self.posicao.y, self.posicao.z)
         jogador.desenha()

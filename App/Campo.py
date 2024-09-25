@@ -13,6 +13,7 @@ class Campo:
         self.lightSpecular = glm.vec3(1.0)     # Is
         self.surfaceSpecular = glm.vec3(0.5)   # Ks               
         self.surfaceShine = 250                # e
+        self.vertices, _, self.normals, self.faces = load_obj_gol("../Texturas/Soccergoal.obj")
 
     def desenha(self):
         gramado = Cube()
@@ -25,23 +26,20 @@ class Campo:
         glPopMatrix()
 
     def desenha_gol(self):
-        filename = "../Texturas/Soccergoal.obj"
-        vertices, _, normals, faces = load_obj_gol(filename)
-        
         glPushMatrix()
         glTranslatef(-1, self.altura/2, 1.5)
         glScalef(1, 1.2, 1.5)
     
-        for face in faces:
+        for face in self.faces:
             if len(face) == 3:
                 glBegin(GL_TRIANGLES)
             else:
                 glBegin(GL_POLYGON)
             
             for vertex, _, normal in face:
-                cor = shading(vertices[vertex], normals[normal], self)
+                cor = shading(self.vertices[vertex] + glm.vec3(-1, self.altura/2, 1.5), self.normals[normal], self)
                 glColor3f(cor.x, cor.y, cor.z)
-                glVertex3f(*vertices[vertex])
+                glVertex3f(*self.vertices[vertex])
             
             glEnd()
 

@@ -102,9 +102,9 @@ class Game:
             glTranslatef(self.campo.largura/2, self.campo.altura/2, 0)
             
             glPushMatrix()
+            # cor da bola
             glTranslatef(self.bola.pos.x, self.bola.pos.y, self.bola.raio/2)
             glRotatef(CONSTS.ang_rot, 0, 1, 0)
-            glTranslatef(0, 0, 0)
             glScalef(self.bola.raio/2, self.bola.raio/2, self.bola.raio/2)
             self.bola.desenha()
             glPopMatrix()
