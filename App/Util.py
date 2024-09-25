@@ -12,6 +12,7 @@ def recalcMov(normal):
     CONSTS.forca = glm.reflect(CONSTS.forca, normal)
     CONSTS.deslocamento = glm.reflect(CONSTS.deslocamento, normal)
     CONSTS.velocidade = glm.reflect(CONSTS.velocidade, normal)
+    CONSTS.vetor_rot = glm.normalize(CONSTS.forca)
 
 
 def carregaTextura(filename):

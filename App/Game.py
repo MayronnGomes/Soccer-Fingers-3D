@@ -102,9 +102,8 @@ class Game:
             glTranslatef(self.campo.largura/2, self.campo.altura/2, 0)
             
             glPushMatrix()
-            # cor da bola
             glTranslatef(self.bola.pos.x, self.bola.pos.y, self.bola.raio/2)
-            glRotatef(CONSTS.ang_rot, 0, 1, 0)
+            glRotatef(CONSTS.ang_rot, CONSTS.vetor_rot.y, CONSTS.vetor_rot.x, CONSTS.vetor_rot.z)
             glScalef(self.bola.raio/2, self.bola.raio/2, self.bola.raio/2)
             self.bola.desenha()
             glPopMatrix()
@@ -337,6 +336,7 @@ class Game:
                 CONSTS.forca.y = round(CONSTS.forca.y, 3)
                 CONSTS.forca.z = 0
                 forcaBar()
+                CONSTS.vetor_rot = glm.normalize(CONSTS.forca)
                 CONSTS.velocidade = glm.normalize(CONSTS.forca) * 0.3
                 CONSTS.mov = True
             elif self.tela == "vencedor1" or self.tela == "vencedor2":
@@ -352,12 +352,14 @@ class Game:
                 CONSTS.camLong = 180
                 CONSTS.frame = 0
                 CONSTS.currentBar = 0
+                CONSTS.vetor_rot = glm.vec3(0)
                 self.tela = "times"
             elif self.tela == "gol":
                 CONSTS.camLat = 25
                 CONSTS.camLong = 180
                 CONSTS.frame = 0
                 CONSTS.currentBar = 0
+                CONSTS.vetor_rot = glm.vec3(0)
                 self.tela = "jogo"
         elif key.lower() == b'f' and self.tela == "jogo":
             self.tela = "formação1"
