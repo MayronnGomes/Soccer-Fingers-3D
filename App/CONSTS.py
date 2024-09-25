@@ -14,6 +14,7 @@ camLat = 25
 camLong = 180
 inc_ang = 3
 ang_rot = 1
+vetor_rot = glm.vec3(0)
 campoLar = 30
 campoAlt = 15
 bolaDiametro = 1
