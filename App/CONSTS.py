@@ -45,6 +45,8 @@ somChute = None
 somOpcao = None
 somSelecionar = None
 somVoltar = None
+somApito = None
+somGol = None
 
 SIGLAS = {}
 
