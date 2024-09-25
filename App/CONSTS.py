@@ -13,6 +13,7 @@ divisaoCilindro = 15
 camLat = 25
 camLong = 180
 inc_ang = 3
+ang_rot = 1
 campoLar = 30
 campoAlt = 15
 bolaDiametro = 1
